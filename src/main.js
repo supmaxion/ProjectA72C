@@ -7,6 +7,7 @@ import { createPlanet } from './entities/Planet.js';
 import { createStarField } from './entities/StarField.js';
 import { MouseLook } from './controls/MouseLook.js';
 import { getOverlayElements } from './ui/overlay.js';
+import { SUN, PLANET, STAR_FIELD } from './config.js';
 
 // --- SCENE / CAMERA / RENDERER ---
 const scene = createScene();
@@ -17,13 +18,15 @@ const renderer = createRenderer(camera);
 const ship = new Ship();
 scene.add(ship.group);
 
-const sun = createSun();
-scene.add(sun);
+const { sprite: sunSprite, light: sunLight } = createSun(SUN);
+scene.add(sunSprite);
+scene.add(sunLight);
+scene.add(sunLight.target);
 
-const planet = createPlanet();
+const planet = createPlanet(PLANET);
 scene.add(planet);
 
-const starField = createStarField();
+const starField = createStarField(STAR_FIELD);
 scene.add(starField);
 
 // --- CONTROLS ---

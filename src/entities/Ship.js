@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { SHIP } from './../config.js';
 
 /**
  * The player ship.
@@ -28,14 +29,14 @@ import * as THREE from 'three';
 export class Ship {
     constructor() {
         this.group = new THREE.Group();
-        this.group.position.set(0, 0, -10);
+        this.group.position.copy(SHIP.startPosition);
 
         this.visualGroup = new THREE.Group();
         this.group.add(this.visualGroup);
 
         this._buildMeshes();
 
-        this.speed = 0.045;
+        this.speed = SHIP.speed;
         this._currentRoll = 0;
     }
 

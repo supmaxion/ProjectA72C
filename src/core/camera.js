@@ -1,14 +1,15 @@
 import * as THREE from 'three';
+import { CAMERA } from './../config.js';
 
 /**
  * Creates the main perspective camera with its initial position.
  */
 export function createCamera() {
     const camera = new THREE.PerspectiveCamera(
-        60,
+        CAMERA.fov,
         window.innerWidth / window.innerHeight,
-        0.1,
-        1000
+        CAMERA.near,
+        CAMERA.far  // far plane: keep well beyond the star field spread
     );
     camera.position.set(0, 3, 15);
     camera.lookAt(0, 0, 0);
@@ -18,7 +19,7 @@ export function createCamera() {
 // Local-space offset of the camera relative to the ship: a bit above,
 // and behind it (the ship's forward is -Z, so a positive Z offset
 // puts the camera behind it).
-const CAMERA_OFFSET_LOCAL = new THREE.Vector3(0, 5, 18);
+const CAMERA_OFFSET_LOCAL = CAMERA.offsetLocal;
 
 /**
  * Updates the camera position and orientation to follow the ship.
