@@ -84,5 +84,6 @@ export class MouseLook {
         }
         document.removeEventListener('pointerlockchange', this._onPointerLockChange);
         document.removeEventListener('mousemove', this._onMouseMove);
+        document.removeEventListener('wheel', this._onWheel);
     }
 }
