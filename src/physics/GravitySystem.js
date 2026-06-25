@@ -61,4 +61,23 @@ export class GravitySystem {
             true
         );
     }
+
+    applyToVelocity(ship) {
+        const shipPos = ship.position;
+        const force = new THREE.Vector3();
+
+        for (const body of this._bodies) {
+            const toBody = body.position.clone().sub(shipPos);
+            const distSq = toBody.lengthSq();
+            const softened = distSq + 100;
+            const forceMag = (GRAVITY.G * body.mass * GRAVITY.scale) / softened;
+            force.addScaledVector(toBody.normalize(), forceMag);
+        }
+
+        // Skálázzuk le hogy ne legyen túl erős
+        force.multiplyScalar(0.0001);
+        ship.applyGravityForce(force);
+    }
+
+
 }

@@ -64,12 +64,17 @@ async function init() {
         physicsWorld.step();
 
         // 5. Sync Three.js position from Rapier
-        ship.syncFromPhysics();
+        // ship.syncFromPhysics();
 
         // 6. Camera follow
         updateCameraFollow(camera, ship);
 
-        // 7. Render
+        ship.update(input);
+        gravitySystem.applyToVelocity(ship);  // ← ez, nem applyTo()
+        // gravitySystem.applyTo(ship.getRigidBody());  ← kommenteld ki
+        physicsWorld.step();
+        // ship.syncFromPhysics();  ← marad kikommentelve
+        updateCameraFollow(camera, ship);
         renderer.render(scene, camera);
     }
 

@@ -21,24 +21,24 @@ export const STAR_FIELD = {
 };
 
 export const SHIP = {
-    startPosition: new THREE.Vector3(0, 0, -10),
+    startPosition: new THREE.Vector3(0, 0, 0),//nem itt hanem a camera offsetjében, de a ship rigid body-nak kell egy kezdő pozíció
     speed: 0.045,
     minSpeed: 0.005,
     maxSpeed: 0.9,
     scrollAcceleration: 0.005,  // sebesség-változás görgőegységenként
-    thrustForce: 0.8,      // hajtóerő nagysága impulzusban
+    thrustForce: 2,      // hajtóerő nagysága impulzusban
     mass: 1.0,
 };
 
 export const CAMERA = {
     fov: 60,
-    near: 10,
+    near: 1,
     far: 1000000,
-    offsetLocal: new THREE.Vector3(0, 5, 18),
+    offsetLocal: new THREE.Vector3(0, 1, 11),//0,5,18
 };
 export const GRAVITY = {
     G: 0.5,
-    scale: 1.0,
+    scale: 1,
 };
 
 export const SOLAR_SYSTEM = {
