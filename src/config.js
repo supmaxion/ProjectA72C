@@ -2,8 +2,8 @@ import * as THREE from 'three';
 
 export const SUN = {
     direction: new THREE.Vector3(-0.4, 0.25, -1).normalize(),
-    distance: 8000,
-    size: 1200,
+    distance: 80000,
+    size: 12000,
     color: 0xffddaa,
     lightIntensity: 2.0,
 };
@@ -30,7 +30,7 @@ export const SHIP = {
 
 export const CAMERA = {
     fov: 60,
-    near: 0.1,
-    far: 50000,
+    near: 10,
+    far: 1000000,
     offsetLocal: new THREE.Vector3(0, 5, 18),
 };

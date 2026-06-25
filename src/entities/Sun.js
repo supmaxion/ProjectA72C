@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { SUN } from './../config.js';
 
 /**
  * The Sun as a background billboard: a THREE.Sprite that always faces
@@ -17,30 +18,33 @@ import * as THREE from 'three';
 export function createSun({
     // Direction from the origin toward the sun (will be normalized).
     // The sprite is placed along this direction at `distance` units.
-    direction = new THREE.Vector3(-0.4, 0.25, -1).normalize(),
-    distance = 800,
-    size = 120,          // visual radius of the sprite in world units
-    color = 0xffddaa,
-    lightIntensity = 2.0,
+    direction = SUN.direction,
+    distance = SUN.distance,
+    size = SUN.size,
+    color = SUN.color,
+    lightIntensity = SUN.lightIntensity,
 } = {}) {
 
     // --- SPRITE (billboard disc) ---
     const canvas = document.createElement('canvas');
-    canvas.width = 256;
-    canvas.height = 256;
+    canvas.width = 100;
+    canvas.height = 100;
     const ctx = canvas.getContext('2d');
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+    const r = canvas.width / 2;
 
     // Soft radial gradient: bright white core fading to the sun color
     // and then to transparent at the edges for a natural glow look.
-    const gradient = ctx.createRadialGradient(128, 128, 0, 128, 128, 128);
+    const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
     gradient.addColorStop(0.0, 'rgba(255, 255, 220, 1.0)');  // white-hot core
-    gradient.addColorStop(0.3, 'rgba(255, 220, 100, 0.9)');  // yellow
-    gradient.addColorStop(0.6, 'rgba(255, 160, 40,  0.5)');  // orange
+    gradient.addColorStop(0.9, 'rgba(255, 220, 100, 0.9)');  // yellow
+    gradient.addColorStop(0.9, 'rgba(255, 160, 40,  2.9)');  // orange
     gradient.addColorStop(1.0, 'rgba(255, 100, 0,   0.0)');  // transparent edge
 
     ctx.fillStyle = gradient;
     ctx.beginPath();
-    ctx.arc(128, 128, 128, 0, Math.PI * 2);
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
     ctx.fill();
 
     const texture = new THREE.CanvasTexture(canvas);
