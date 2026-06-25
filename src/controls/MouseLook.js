@@ -16,12 +16,18 @@ export class MouseLook {
         this._yawInput = 0;
         this._pitchInput = 0;
 
+        this._scrollDelta = 0;
+
         this._clickToStartEl = clickToStartEl;
         this._domElement = domElement || document.body;
 
         this._onClickToStart = this._onClickToStart.bind(this);
         this._onPointerLockChange = this._onPointerLockChange.bind(this);
         this._onMouseMove = this._onMouseMove.bind(this);
+        
+        //wheel event listener for speed control
+        this._onWheel = this._onWheel.bind(this);
+        document.addEventListener('wheel', this._onWheel, { passive: true });
 
         if (this._clickToStartEl) {
             this._clickToStartEl.addEventListener('click', this._onClickToStart);
@@ -52,14 +58,23 @@ export class MouseLook {
         this._pitchInput -= deltaY * this.sensitivity;
     }
 
+    //wheel event listener for speed control
+    _onWheel(event) {
+        if (!this.isLocked) return;
+        this._scrollDelta += event.deltaY;
+    }
+
     /**
      * Returns the accumulated { yaw, pitch } input since the last call,
      * and resets the accumulators. Call this once per frame.
      */
     consume() {
-        const result = { yaw: this._yawInput, pitch: this._pitchInput };
+
+        const result = { yaw: this._yawInput, pitch: this._pitchInput, scroll: this._scrollDelta };
         this._yawInput = 0;
         this._pitchInput = 0;
+        this._scrollDelta = 0;
+
         return result;
     }
 

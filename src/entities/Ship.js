@@ -37,6 +37,9 @@ export class Ship {
         this._buildMeshes();
 
         this.speed = SHIP.speed;
+        this._minSpeed = SHIP.minSpeed;
+        this._maxSpeed = SHIP.maxSpeed;
+        this._scrollAcceleration = SHIP.scrollAcceleration;
         this._currentRoll = 0;
     }
 
@@ -134,7 +137,13 @@ export class Ship {
      *   rotation input (e.g. from MouseLook.consume()).
      */
     update(input) {
-        const { yaw, pitch } = input;
+        const { yaw, pitch, scroll } = input;
+
+        // Scroll: positive deltaY = scroll down = decelerate
+        if (scroll !== 0) {
+            this.speed -= Math.sign(scroll) * this._scrollAcceleration;
+        }
+        this.speed = Math.max(this._minSpeed, Math.min(this._maxSpeed, this.speed));
 
         // --- TRUE movement orientation: pitch + yaw only, no roll ---
         const deltaEuler = new THREE.Euler(pitch, yaw, 0, 'XYZ');

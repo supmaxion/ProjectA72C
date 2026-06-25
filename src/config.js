@@ -23,6 +23,9 @@ export const STAR_FIELD = {
 export const SHIP = {
     startPosition: new THREE.Vector3(0, 0, -10),
     speed: 0.045,
+    minSpeed: 0.005,
+    maxSpeed: 0.9,
+    scrollAcceleration: 0.005,  // sebesség-változás görgőegységenként
 };
 
 export const CAMERA = {
