@@ -18,3 +18,6 @@ export function createRenderer(camera) {
 
     return renderer;
 }
+
+
+export const clock = new THREE.Clock();

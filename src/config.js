@@ -14,10 +14,10 @@ export const PLANET = {
     color: 0x44dd88,
 };
 
-export const STAR_FIELD = {
+export const DUST_FIELD = {
     count: 3000,
-    spread: 600,
-    centerZ: -100,
+    spread: 60000,
+    centerZ: 0,
 };
 
 export const SHIP = {
@@ -87,4 +87,34 @@ export const SOLAR_SYSTEM = {
             moons: [],
         },
     ],
+};
+
+export const BACKGROUND_OBJECTS = {
+  spawnRadius: {
+    min: 8000,   // ne legyen túl közel az origóhoz
+    max: 20000,
+  },
+  counts: {
+    nebula:      6,
+    galaxy:      4,
+    starCluster: 5,
+    pulsar:      3,
+  },
+  nebula: {
+    minSize: 800,
+    maxSize: 2500,
+  },
+  galaxy: {
+    minSize: 600,
+    maxSize: 1800,
+  },
+  starCluster: {
+    minSize: 400,
+    maxSize: 1200,
+  },
+  pulsar: {
+    minSize: 80,
+    maxSize: 200,
+    pulseSpeed: 4.0,  // rad/s
+  },
 };

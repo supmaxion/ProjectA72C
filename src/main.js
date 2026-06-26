@@ -1,15 +1,16 @@
 import { createScene } from './core/scene.js';
 import { createCamera, updateCameraFollow } from './core/camera.js';
-import { createRenderer } from './core/renderer.js';
+import { createRenderer, clock } from './core/renderer.js';
 import { Ship } from './entities/Ship.js';
 import { createSun } from './entities/Sun.js';
-import { createStarField } from './entities/StarField.js';
+import { createDustField } from './entities/DustField.js';
 import { SolarSystem } from './entities/SolarSystem.js';
 import { PhysicsWorld } from './physics/PhysicsWorld.js';
 import { GravitySystem } from './physics/GravitySystem.js';
 import { MouseLook } from './controls/MouseLook.js';
 import { getOverlayElements } from './ui/overlay.js';
-import { SUN, STAR_FIELD } from './config.js';
+import { SUN, DUST_FIELD } from './config.js';
+import { spawnBackgroundObjects } from './entities/BackgroundObject.js';
 
 async function init() {
     // --- CORE ---
@@ -32,11 +33,13 @@ async function init() {
     scene.add(sunLight);
     scene.add(sunLight.target);
 
-    const starField = createStarField(STAR_FIELD);
-    scene.add(starField);
+    const dustField = createDustField(DUST_FIELD);
+    scene.add(dustField);
 
     // SolarSystem builds all planets + moons, registers gravity attractors
     const solarSystem = new SolarSystem(scene, physicsWorld, gravitySystem);
+
+    const backgroundObjects = spawnBackgroundObjects(scene);
 
     // --- CONTROLS ---
     const { clickToStart } = getOverlayElements();
@@ -49,6 +52,7 @@ async function init() {
     function animate() {
         requestAnimationFrame(animate);
 
+        const delta = clock.getDelta();
         const input = mouseLook.consume();
 
         // 1. Ship rotation + thrust impulse → Rapier
@@ -69,12 +73,13 @@ async function init() {
         // 6. Camera follow
         updateCameraFollow(camera, ship);
 
-        ship.update(input);
+        
+        backgroundObjects.forEach(obj => obj.update(delta));
+
         gravitySystem.applyToVelocity(ship);  // ← ez, nem applyTo()
         // gravitySystem.applyTo(ship.getRigidBody());  ← kommenteld ki
-        physicsWorld.step();
-        // ship.syncFromPhysics();  ← marad kikommentelve
-        updateCameraFollow(camera, ship);
+        
+        
         renderer.render(scene, camera);
     }
 

@@ -1,13 +1,6 @@
 import * as THREE from 'three';
 
-/**
- * Creates a static field of distant background stars as a THREE.Points
- * cloud. Deliberately static (no rotation applied anywhere) -- these
- * represent a far-away backdrop, not nearby objects the ship is
- * moving relative to. Asteroids (which DO need to be nearby, moving,
- * collidable objects) are a separate, future entity.
- */
-export function createStarField({
+export function createDustField({
     count = 3000,
     spread = 600,
     centerZ = -100,

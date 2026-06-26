@@ -43,7 +43,7 @@ export class Ship {
     update(input) {
         const { yaw, pitch, scroll } = input;
 
-        // --- ROTATION: unchanged, kvaternió-delta alapú ---
+        // --- ROTATION ---
         const deltaEuler = new THREE.Euler(pitch, yaw, 0, 'XYZ');
         const deltaQuat = new THREE.Quaternion().setFromEuler(deltaEuler);
         this.group.quaternion.multiply(deltaQuat);
@@ -64,22 +64,22 @@ export class Ship {
             );
         }
 
-        // Thrust: forward irányba gyorsítás
+        // --- MOZGÁS ---
         const forward = new THREE.Vector3(0, 0, -1)
             .applyQuaternion(this.group.quaternion);
 
-        // Gravitációs (forward-ra merőleges) velocity komponens megtartása
+        // A velocity-ből kivonjuk a forward komponenst,
+        // megtartjuk csak a gravitációs sodródást
         const forwardSpeed = this._velocity.dot(forward);
         const gravityDrift = this._velocity.clone()
             .addScaledVector(forward, -forwardSpeed);
 
-        // Forward komponens = pontosan a thrustLevel (nem halmozódik)
+        // Forward sebesség = pontosan thrustLevel, nem halmozódik
+        // Így a scroll azonnal hat mindkét irányban
         this._velocity.copy(gravityDrift)
             .addScaledVector(forward, this._thrustLevel);
 
         this.group.position.add(this._velocity);
-
-
     }
             
     applyGravityForce(force) {
