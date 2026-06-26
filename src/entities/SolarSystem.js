@@ -1,25 +1,16 @@
 import * as THREE from 'three';
 import { CelestialBody } from './CelestialBody.js';
+import { createOrbitLine, DynamicTrail } from './OrbitTrail.js'; // ← ÚJ
 import { SOLAR_SYSTEM, GRAVITY } from '../config.js';
 
-/**
- * Builds and manages the entire solar system:
- * - The Sun (static, just a gravitational attractor + the existing sprite)
- * - Planets on Keplerian orbits around the Sun
- * - Moons on Keplerian orbits around their parent planet
- *
- * All bodies register themselves with the GravitySystem so they
- * automatically attract the ship each frame.
- */
 export class SolarSystem {
     constructor(scene, physicsWorld, gravitySystem) {
         this._scene = scene;
         this._planets = [];
         this._time = 0;
+        this._trails = []; // ← ÚJ: minden trail (bolygó + hold)
+        this._orbitLines = []; // ← ÚJ: csak bolygók ellipszise
 
-        // Register the Sun as a gravitational attractor.
-        // It has no orbit (it's at the origin) so no CelestialBody needed --
-        // just a gravity registration.
         const sunPos = new THREE.Vector3(
             SOLAR_SYSTEM.sun.position.x,
             SOLAR_SYSTEM.sun.position.y,
@@ -27,7 +18,6 @@ export class SolarSystem {
         );
         gravitySystem.addBody(sunPos, SOLAR_SYSTEM.sun.mass);
 
-        // Build planets and their moons from config
         for (const bodyConfig of SOLAR_SYSTEM.bodies) {
             const planet = new CelestialBody({
                 name: bodyConfig.name,
@@ -42,7 +32,17 @@ export class SolarSystem {
 
             scene.add(planet.group);
 
-            // Build moons
+            // ← ÚJ: statikus orbit ellipszis
+            const orbitLine = createOrbitLine(bodyConfig.orbit, sunPos, bodyConfig.color);
+            scene.add(orbitLine);
+            this._orbitLines.push(orbitLine);
+
+            // ← ÚJ: dinamikus trail a bolygónak
+            this._trails.push({
+                trail: new DynamicTrail(scene, bodyConfig.color),
+                body: planet,
+            });
+
             if (bodyConfig.moons) {
                 for (const moonConfig of bodyConfig.moons) {
                     const moon = new CelestialBody({
@@ -51,13 +51,19 @@ export class SolarSystem {
                         radius: moonConfig.radius,
                         color: moonConfig.color,
                         orbit: moonConfig.orbit,
-                        orbitCenter: planet.position, // orbits the planet
+                        orbitCenter: planet.position,
                         physicsWorld,
                         gravitySystem,
                     });
 
                     scene.add(moon.group);
                     planet.moons.push(moon);
+
+                    // ← ÚJ: dinamikus trail a holdnak (ellipszis nélkül)
+                    this._trails.push({
+                        trail: new DynamicTrail(scene, moonConfig.color),
+                        body: moon,
+                    });
                 }
             }
 
@@ -67,8 +73,22 @@ export class SolarSystem {
 
     update() {
         this._time++;
+        const now = performance.now() / 1000;
+
         for (const planet of this._planets) {
             planet.update(this._time);
+        }
+
+        // ← ÚJ: trail frissítése minden testnek
+        for (const { trail, body } of this._trails) {
+            trail.update(body.position, now);
+        }
+    }
+
+    // ← ÚJ: T billentyűre hívható
+    setOrbitLinesVisible(visible) {
+        for (const line of this._orbitLines) {
+            line.visible = visible;
         }
     }
 }

@@ -118,3 +118,12 @@ export const BACKGROUND_OBJECTS = {
     pulseSpeed: 4.0,  // rad/s
   },
 };
+
+export const ORBIT_TRAIL = {
+    ellipsePoints:    180,     // statikus ellipszis pontjainak száma
+    ellipseOpacity:   0.18,    // halvány
+    trailDuration:    10.0,     // másodperc
+    trailMaxPoints:   300,     // max tárolt pont
+    trailMaxOpacity:  1.5,     // trail legfényesebb pontja
+    minDistance:      5,       // minimum elmozdulás új pont felvételéhez
+};

@@ -48,6 +48,17 @@ async function init() {
         domElement: renderer.domElement,
     });
 
+    // --- toggle orbit lines ---
+    let orbitLinesVisible = true;
+    solarSystem.setOrbitLinesVisible(orbitLinesVisible);
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 't' || e.key === 'T') {
+            orbitLinesVisible = !orbitLinesVisible;
+            solarSystem.setOrbitLinesVisible(orbitLinesVisible);
+        }
+    });
+    
+
     // --- GAME LOOP ---
     function animate() {
         requestAnimationFrame(animate);
