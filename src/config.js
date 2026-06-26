@@ -22,7 +22,7 @@ export const DUST_FIELD = {
 
 export const SHIP = {
     startPosition: new THREE.Vector3(0, 0, 2200),
-    speed: 1.045,
+    speed: 10.045,
     minSpeed: 0.001,
     maxSpeed: 0.9,
     scrollAcceleration: 0.5,  // sebesség-változás görgőegységenként 0,005
@@ -90,6 +90,7 @@ export const SOLAR_SYSTEM = {
 };
 
 export const BACKGROUND_OBJECTS = {
+    skyDistance: 900000, // kamerától való távolság — a far plane alatt kell legyen
   spawnRadius: {
     min: 8000,   // ne legyen túl közel az origóhoz
     max: 20000,

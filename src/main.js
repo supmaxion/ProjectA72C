@@ -86,7 +86,7 @@ async function init() {
         updateCameraFollow(camera, ship);
 
         
-        backgroundObjects.forEach(obj => obj.update(delta));
+        backgroundObjects.forEach(obj => obj.update(delta, camera.position));
 
         gravitySystem.applyToVelocity(ship);  // ← ez, nem applyTo()
         // gravitySystem.applyTo(ship.getRigidBody());  ← kommenteld ki
