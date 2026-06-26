@@ -28,10 +28,11 @@ async function init() {
     const ship = new Ship(physicsWorld);
     scene.add(ship.group);
 
-    const { sprite: sunSprite, light: sunLight } = createSun(SUN);
-    scene.add(sunSprite);
-    scene.add(sunLight);
-    scene.add(sunLight.target);
+    const { mesh, glow, light } = createSun();
+    scene.add(mesh);
+    scene.add(glow);
+    scene.add(light);
+    scene.add(light.target); // DirectionalLight target kell a scene-be
 
     const dustField = createDustField(DUST_FIELD);
     scene.add(dustField);

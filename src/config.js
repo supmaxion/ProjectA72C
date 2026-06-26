@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 
 export const SUN = {
-    direction: new THREE.Vector3(-0.4, 0.25, -1).normalize(),
-    distance: 80000,
-    size: 12000,
+    direction: new THREE.Vector3(0,0,0),
+    distance: 0,
+    size: 900,
     color: 0xffddaa,
     lightIntensity: 2.0,
 };
@@ -16,16 +16,16 @@ export const PLANET = {
 
 export const DUST_FIELD = {
     count: 3000,
-    spread: 60000,
+    spread: 600000,
     centerZ: 0,
 };
 
 export const SHIP = {
-    startPosition: new THREE.Vector3(0, 0, 0),//nem itt hanem a camera offsetjében, de a ship rigid body-nak kell egy kezdő pozíció
-    speed: 0.045,
-    minSpeed: 0.005,
+    startPosition: new THREE.Vector3(0, 0, 2200),
+    speed: 1.045,
+    minSpeed: 0.001,
     maxSpeed: 0.9,
-    scrollAcceleration: 0.005,  // sebesség-változás görgőegységenként
+    scrollAcceleration: 0.5,  // sebesség-változás görgőegységenként 0,005
     thrustForce: 2,      // hajtóerő nagysága impulzusban
     mass: 1.0,
 };
