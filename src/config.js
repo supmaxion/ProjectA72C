@@ -21,10 +21,10 @@ export const DUST_FIELD = {
 };
 
 export const SHIP = {
-    startPosition: new THREE.Vector3(0, 0, 2200),
-    speed: 10.045,
-    minSpeed: 0.001,
-    maxSpeed: 0.9,
+    startPosition: new THREE.Vector3(0, 3000, 10000),
+    speed: 0.045,
+    minSpeed: 0.000001,
+    maxSpeed: 9999,
     scrollAcceleration: 0.5,  // sebesség-változás görgőegységenként 0,005
     thrustForce: 2,      // hajtóerő nagysága impulzusban
     mass: 1.0,
@@ -85,6 +85,236 @@ export const SOLAR_SYSTEM = {
                 speed: 0.00015,
             },
             moons: [],
+        },
+        {
+            name: 'planet-gamma',
+            mass: 6,
+            radius: 28,
+            color: 0x66ccff,
+            orbit: {
+                semiMajorAxis: 3200,
+                eccentricity: 0.05,
+                inclination: 0.08,
+                speed: 0.00014,
+            },
+            moons: [
+                {
+                    name: 'gamma-moon-1',
+                    mass: 1,
+                    radius: 12,
+                    color: 0xb0b0b0,
+                    orbit: {
+                        semiMajorAxis: 180,
+                        eccentricity: 0.03,
+                        inclination: 0.04,
+                        speed: 0.0021,
+                    },
+                },
+            ],
+        },
+        {
+            name: 'planet-delta',
+            mass: 10,
+            radius: 42,
+            color: 0xaaff66,
+            orbit: {
+                semiMajorAxis: 4200,
+                eccentricity: 0.18,
+                inclination: 0.03,
+                speed: 0.00012,
+            },
+            moons: [
+                {
+                    name: 'delta-moon-1',
+                    mass: 1,
+                    radius: 10,
+                    color: 0x9a9a9a,
+                    orbit: {
+                        semiMajorAxis: 200,
+                        eccentricity: 0.01,
+                        inclination: 0.02,
+                        speed: 0.0023,
+                    },
+                },
+                {
+                    name: 'delta-moon-2',
+                    mass: 2,
+                    radius: 14,
+                    color: 0xc0c0c0,
+                    orbit: {
+                        semiMajorAxis: 280,
+                        eccentricity: 0.05,
+                        inclination: 0.06,
+                        speed: 0.0018,
+                    },
+                },
+            ],
+        },
+        {
+            name: 'planet-epsilon',
+            mass: 4,
+            radius: 22,
+            color: 0xffcc00,
+            orbit: {
+                semiMajorAxis: 5200,
+                eccentricity: 0.22,
+                inclination: 0.11,
+                speed: 0.00011,
+            },
+            moons: [],
+        },
+        {
+            name: 'planet-zeta',
+            mass: 9,
+            radius: 38,
+            color: 0xcc66ff,
+            orbit: {
+                semiMajorAxis: 6500,
+                eccentricity: 0.1,
+                inclination: 0.06,
+                speed: 0.000095,
+            },
+            moons: [
+                {
+                    name: 'zeta-moon-1',
+                    mass: 1,
+                    radius: 11,
+                    color: 0xaaaaaa,
+                    orbit: {
+                        semiMajorAxis: 190,
+                        eccentricity: 0.02,
+                        inclination: 0.03,
+                        speed: 0.0020,
+                    },
+                },
+            ],
+        },
+        {
+            name: 'planet-eta',
+            mass: 7,
+            radius: 33,
+            color: 0xff3366,
+            orbit: {
+                semiMajorAxis: 8200,
+                eccentricity: 0.15,
+                inclination: 0.09,
+                speed: 0.000085,
+            },
+            moons: [
+                {
+                    name: 'eta-moon-1',
+                    mass: 1,
+                    radius: 9,
+                    color: 0x8f8f8f,
+                    orbit: {
+                        semiMajorAxis: 170,
+                        eccentricity: 0.04,
+                        inclination: 0.05,
+                        speed: 0.0024,
+                    },
+                },
+                {
+                    name: 'eta-moon-2',
+                    mass: 1,
+                    radius: 13,
+                    color: 0xbdbdbd,
+                    orbit: {
+                        semiMajorAxis: 230,
+                        eccentricity: 0.02,
+                        inclination: 0.07,
+                        speed: 0.0019,
+                    },
+                },
+                {
+                    name: 'eta-moon-3',
+                    mass: 2,
+                    radius: 16,
+                    color: 0xd0d0d0,
+                    orbit: {
+                        semiMajorAxis: 320,
+                        eccentricity: 0.06,
+                        inclination: 0.02,
+                        speed: 0.0016,
+                    },
+                },
+            ],
+        },
+        {
+            name: 'planet-theta',
+            mass: 12,
+            radius: 50,
+            color: 0x33ffee,
+            orbit: {
+                semiMajorAxis: 10500,
+                eccentricity: 0.07,
+                inclination: 0.04,
+                speed: 0.000075,
+            },
+            moons: [],
+        },
+        {
+            name: 'planet-iota',
+            mass: 5,
+            radius: 26,
+            color: 0xff8844,
+            orbit: {
+                semiMajorAxis: 13000,
+                eccentricity: 0.2,
+                inclination: 0.13,
+                speed: 0.000065,
+            },
+            moons: [
+                {
+                    name: 'iota-moon-1',
+                    mass: 1,
+                    radius: 10,
+                    color: 0xa0a0a0,
+                    orbit: {
+                        semiMajorAxis: 190,
+                        eccentricity: 0.03,
+                        inclination: 0.04,
+                        speed: 0.0022,
+                    },
+                },
+            ],
+        },
+        {
+            name: 'planet-kappa',
+            mass: 11,
+            radius: 46,
+            color: 0x4488ff,
+            orbit: {
+                semiMajorAxis: 16000,
+                eccentricity: 0.12,
+                inclination: 0.02,
+                speed: 0.000055,
+            },
+            moons: [
+                {
+                    name: 'kappa-moon-1',
+                    mass: 2,
+                    radius: 14,
+                    color: 0xb5b5b5,
+                    orbit: {
+                        semiMajorAxis: 220,
+                        eccentricity: 0.01,
+                        inclination: 0.03,
+                        speed: 0.0019,
+                    },
+                },
+                {
+                    name: 'kappa-moon-2',
+                    mass: 1,
+                    radius: 11,
+                    color: 0xdcdcdc,
+                    orbit: {
+                        semiMajorAxis: 300,
+                        eccentricity: 0.05,
+                        inclination: 0.06,
+                        speed: 0.0015,
+                    },
+                },
+            ],
         },
     ],
 };

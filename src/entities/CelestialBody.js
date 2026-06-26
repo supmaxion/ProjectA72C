@@ -55,6 +55,9 @@ export class CelestialBody {
         // --- GRAVITY REGISTRATION ---
         this._gravityIndex = gravitySystem.addBody(this.position, mass);
         this._gravitySystem = gravitySystem;
+
+        // Planets random place in orbit, moons random place in orbit around planet
+        this._phaseOffset = orbit.phaseOffset ?? (Math.random() * Math.PI * 2 / orbit.speed);
     }
 
     /**
@@ -63,7 +66,7 @@ export class CelestialBody {
      */
     update(time) {
         // Compute new position from Keplerian formula
-        keplerPosition(this.orbit, time, this.orbitCenter, this.position);
+        keplerPosition(this.orbit, time + this._phaseOffset, this.orbitCenter, this.position);
 
         // Sync Three.js mesh
         this.group.position.copy(this.position);
