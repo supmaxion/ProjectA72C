@@ -90,7 +90,7 @@ export const SOLAR_SYSTEM = {
 };
 
 export const BACKGROUND_OBJECTS = {
-    skyDistance: 900000, // kamerától való távolság — a far plane alatt kell legyen
+    skyDistance: 9000, // kamerától való távolság — a far plane alatt kell legyen
   spawnRadius: {
     min: 8000,   // ne legyen túl közel az origóhoz
     max: 20000,

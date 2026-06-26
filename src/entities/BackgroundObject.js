@@ -197,19 +197,19 @@ const TYPES = {
 
 export class BackgroundObject {
     /**
-     * @param {THREE.Camera} camera  - a sprite a kamera gyereke lesz → mindig háttérben marad
+     * @param {THREE.Scene} scene
      * @param {THREE.Vector3} direction  - egységvektor: merre legyen a kamerától
      * @param {'nebula'|'galaxy'|'starCluster'|'pulsar'} type
      */
     constructor(scene, direction, type = 'nebula') {
-        this._scene = scene;
+        this._scene     = scene;
         this._direction = direction.clone().normalize();
-        this.type    = type;
-        this._time   = Math.random() * Math.PI * 2;
+        this.type       = type;
+        this._time      = Math.random() * Math.PI * 2;
 
-        const def        = TYPES[type];
+        const def          = TYPES[type];
         const [minS, maxS] = def.sizeRange;
-        this._size       = minS + Math.random() * (maxS - minS);
+        this._size         = minS + Math.random() * (maxS - minS);
 
         const texture  = def.makeTexture();
         const material = new THREE.SpriteMaterial({
@@ -220,23 +220,19 @@ export class BackgroundObject {
         });
 
         this.sprite = new THREE.Sprite(material);
-
-        // A pozíció a kamera saját koordinátarendszerében értendő.
-        // CFG.skyDistance egységre tesszük a kamerától a megadott irányba.
-        // Mivel a kamera gyereke, mozgásával együtt mozog → soha nem lehet "mögé" menni.
-        this.sprite.position.copy(direction.clone().multiplyScalar(CFG.skyDistance));
         this.sprite.scale.set(this._size, this._size, 1);
         this.sprite.renderOrder = -1;
 
-        camera.add(this.sprite);
+        scene.add(this.sprite);
     }
 
     /**
+     * Minden frame-ben a kamera pozíciójához igazítja a sprite-ot.
+     * Így mindig skyDistance távolságra lesz a kamerától → nem lehet mögé menni.
      * @param {number} delta
-     * @param {THREE.Vector3} cameraPosition  - minden frame-ben szinkronizál
+     * @param {THREE.Vector3} cameraPosition
      */
     update(delta, cameraPosition) {
-        // Mindig a kamera mellé mozgatjuk a megadott irányba
         this.sprite.position
             .copy(this._direction)
             .multiplyScalar(CFG.skyDistance)
@@ -253,15 +249,15 @@ export class BackgroundObject {
     dispose() {
         this.sprite.material.map?.dispose();
         this.sprite.material.dispose();
-        this._camera.remove(this.sprite);
+        this._scene.remove(this.sprite);
     }
 }
 
 // ─── Factory ─────────────────────────────────────────────────────────────────
 
 /**
- * Létrehoz N darab BackgroundObject-et random irányban, a kamerához kötve.
- * @param {THREE.Camera} camera
+ * Létrehoz N darab BackgroundObject-et random irányban.
+ * @param {THREE.Scene} scene
  * @returns {BackgroundObject[]}
  */
 export function spawnBackgroundObjects(scene) {
@@ -275,7 +271,6 @@ export function spawnBackgroundObjects(scene) {
     ];
 
     for (const type of typeList) {
-        // Random irány a gömb felületén
         const theta = Math.random() * Math.PI * 2;
         const phi   = Math.acos(2 * Math.random() - 1);
 
@@ -285,7 +280,7 @@ export function spawnBackgroundObjects(scene) {
             Math.cos(phi)
         );
 
-        objects.push(new BackgroundObject(camera, dir, type));
+        objects.push(new BackgroundObject(scene, dir, type));
     }
 
     return objects;
