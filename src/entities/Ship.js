@@ -1,30 +1,115 @@
 import * as THREE from 'three';
-import { buildShipMeshes } from './Ship.shape.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import { SHIP } from '../config.js';
+
+const modelPath = import.meta.env.BASE_URL + 'models/ufo.obj';
 
 export class Ship {
     constructor(physicsWorld) {
-        // --- THREE.JS GROUPS (rotation architecture unchanged) ---
+        // --- THREE.JS GROUPS ---
         this.group = new THREE.Group();
         this.group.position.copy(SHIP.startPosition);
 
         this.visualGroup = new THREE.Group();
         this.group.add(this.visualGroup);
 
-        this._buildMeshes();
+        // Modell betöltése
+        this._modelLoaded = false;
+        this._loadModel();
+
         this._currentRoll = 0;
 
         // --- RAPIER RIGID BODY ---
         this._body = physicsWorld.createShipBody(SHIP.startPosition);
 
-        // Scroll-based thrust level (replaces old speed variable)
+        // Scroll-based thrust level
         this._thrustLevel = SHIP.speed;
 
         this._velocity = new THREE.Vector3();
     }
 
+    /**
+     * OBJ modell betöltése
+     */
+    _loadModel() {
+        const loader = new OBJLoader();
+        
+        // Opcionális: ha van anyag fájl (mtl)
+        // const mtlLoader = new MTLLoader();
+        // mtlLoader.load(modelPath.replace('.obj', '.mtl'), (materials) => {
+        //     materials.preload();
+        //     loader.setMaterials(materials);
+        //     this._loadOBJ(loader);
+        // });
+        // Ha nincs mtl, közvetlenül betöltjük:
+        this._loadOBJ(loader);
+    }
+
+    _loadOBJ(loader) {
+        loader.load(
+            modelPath,
+            (obj) => {
+                // Sikeres betöltés
+                console.log('OBJ modell betöltve!');
+                this._onModelLoaded(obj);
+            },
+            (xhr) => {
+                // Betöltés folyamata
+                const percent = (xhr.loaded / xhr.total) * 100;
+                console.log(`OBJ betöltés: ${Math.round(percent)}%`);
+            },
+            (error) => {
+                // Hiba esetén - ha nincs OBJ, használjuk a geometriai hajót
+                console.warn('OBJ betöltés sikertelen, geometriai hajó használata:', error);
+                this._buildMeshes();
+            }
+        );
+    }
+
+    _onModelLoaded(model) {
+        // Modell skálázása, ha szükséges
+        const scale = 1.0; // Állítsd be a megfelelő méretre
+        model.scale.set(scale, scale, scale);
+        
+        // Modell pozicionálása (ha szükséges)
+        model.position.set(0, 0, 0);
+        
+        // Modell forgatása (ha szükséges)
+        // model.rotation.set(0, 0, 0);
+        
+        // Anyagok beállítása (ha szükséges)
+        model.traverse((child) => {
+            if (child.isMesh) {
+                // Ha nincs anyag, vagy szeretnéd módosítani
+                if (!child.material) {
+                    child.material = new THREE.MeshStandardMaterial({
+                        color: 0x888888,
+                        metalness: 0.5,
+                        roughness: 0.3,
+                    });
+                }
+                
+                // Opcionális: árnyék beállítása
+                child.castShadow = true;
+                child.receiveShadow = true;
+            }
+        });
+
+        this.visualGroup.add(model);
+        this._modelLoaded = true;
+        console.log('OBJ modell hozzáadva a hajóhoz!');
+    }
+
+    /**
+     * Tartalék geometriai hajó, ha az OBJ nem tölthető be
+     */
     _buildMeshes() {
-        buildShipMeshes(this.visualGroup);
+        // Itt hozd létre a saját geometriai hajódat
+        // Vagy meghívhatod a régi buildShipMeshes-t
+        import('./Ship.shape.js').then(module => {
+            module.buildShipMeshes(this.visualGroup);
+        });
     }
 
     get position() {
@@ -37,8 +122,6 @@ export class Ship {
 
     /**
      * Called every frame BEFORE physicsWorld.step().
-     * Handles rotation (unchanged from before) and applies
-     * thrust as a Rapier impulse in the ship's forward direction.
      */
     update(input) {
         const { yaw, pitch, scroll } = input;
@@ -68,14 +151,10 @@ export class Ship {
         const forward = new THREE.Vector3(0, 0, -1)
             .applyQuaternion(this.group.quaternion);
 
-        // A velocity-ből kivonjuk a forward komponenst,
-        // megtartjuk csak a gravitációs sodródást
         const forwardSpeed = this._velocity.dot(forward);
         const gravityDrift = this._velocity.clone()
             .addScaledVector(forward, -forwardSpeed);
 
-        // Forward sebesség = pontosan thrustLevel, nem halmozódik
-        // Így a scroll azonnal hat mindkét irányban
         this._velocity.copy(gravityDrift)
             .addScaledVector(forward, this._thrustLevel);
 
@@ -88,8 +167,6 @@ export class Ship {
 
     /**
      * Called every frame AFTER physicsWorld.step().
-     * Copies the Rapier RigidBody's position back to the Three.js group.
-     * Rotation stays kvaternió-vezérelt (we don't read rotation from Rapier).
      */
     syncFromPhysics() {
         const pos = this._body.translation();

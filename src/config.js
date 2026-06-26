@@ -34,7 +34,7 @@ export const CAMERA = {
     fov: 60,
     near: 1,
     far: 1000000,
-    offsetLocal: new THREE.Vector3(0, 1, 11),//0,5,18
+    offsetLocal: new THREE.Vector3(0, 3, 30),//0,5,18
 };
 export const GRAVITY = {
     G: 0.5,
