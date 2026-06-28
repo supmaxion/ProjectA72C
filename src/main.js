@@ -20,11 +20,12 @@ async function init() {
     const ship = new Ship();
     scene.add(ship.group);
 
-    const { mesh, glow, light } = createSun();
+    const { mesh, glow, light, ambientLight } = createSun();
     scene.add(mesh);
     scene.add(glow);
     scene.add(light);
     scene.add(light.target);
+    scene.add(ambientLight);
 
     const dustField = createDustField(DUST_FIELD);
     scene.add(dustField);

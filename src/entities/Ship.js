@@ -1,8 +1,8 @@
 import * as THREE from 'three';
-import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { SHIP } from '../config.js';
 
-const modelPath = import.meta.env.BASE_URL + 'models/ufo.obj';
+const modelPath = import.meta.env.BASE_URL + 'models/ship.glb';
 
 export class Ship {
     constructor() {
@@ -18,38 +18,63 @@ export class Ship {
         this._scrollAcceleration = SHIP.scrollAcceleration;
         this._currentRoll = 0;
 
-        // OBJ betöltése, fallback ha nem sikerül
         this._loadModel();
     }
 
     _loadModel() {
-        const loader = new OBJLoader();
+        const loader = new GLTFLoader();
         loader.load(
             modelPath,
-            (obj) => {
-                obj.scale.set(1, 1, 1);
-                obj.position.set(0, 0, 0);
+            (gltf) => {
+                const model = gltf.scene;
+                model.rotation.y = Math.PI;
+                model.rotation.x = 0.1;
+                model.position.set(0, 0, 0);
 
-                obj.traverse((child) => {
-                    if (child.isMesh && !child.material) {
-                        child.material = new THREE.MeshStandardMaterial({
-                            color: 0x888888,
-                            metalness: 0.5,
-                            roughness: 0.3,
-                        });
+                // Automatikus méretezés
+                const box = new THREE.Box3().setFromObject(model);
+                const size = box.getSize(new THREE.Vector3()).length();
+                const scale = SHIP.modelSize / size;
+                model.scale.setScalar(scale);
+
+                // Anyagok finomítása (megtartja az eredeti textúrákat)
+                model.traverse((child) => {
+
+                    if (child.isMesh) {
+    console.log(child.name, child.material?.type);
+}
+
+
+                    if (child.isMesh) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                       
+if (child.material) {
+    // van anyag — módosítjuk
+    child.material.metalness = 0.8;
+    child.material.roughness = 0.2;
+    child.material.envMapIntensity = 1.0;
+} else {
+    // nincs anyag — létrehozunk egyet
+    child.material = new THREE.MeshStandardMaterial({
+        color: 0xaaaaaa,
+        metalness: 0.8,
+        roughness: 0.2,
+    });
+}
                     }
                 });
 
-                this.visualGroup.add(obj);
-                console.log('OBJ modell betöltve!');
+                this.visualGroup.add(model);
+                console.log(`GLB modell betöltve! Méret: ${size.toFixed(2)}, skála: ${scale.toFixed(4)}`);
             },
             (xhr) => {
                 if (xhr.total > 0) {
-                    console.log(`OBJ betöltés: ${Math.round((xhr.loaded / xhr.total) * 100)}%`);
+                    console.log(`GLB betöltés: ${Math.round((xhr.loaded / xhr.total) * 100)}%`);
                 }
             },
             (error) => {
-                console.warn('OBJ betöltés sikertelen, fallback geometria:', error);
+                console.warn('GLB betöltés sikertelen, fallback geometria:', error);
                 this._buildFallback();
             }
         );
@@ -80,20 +105,17 @@ export class Ship {
         }
         this.speed = Math.max(this._minSpeed, Math.min(this._maxSpeed, this.speed));
 
-        // Rotáció: pitch + yaw a hajó saját lokális terében
         const deltaQuat = new THREE.Quaternion().setFromEuler(
             new THREE.Euler(pitch, yaw, 0, 'XYZ')
         );
         this.group.quaternion.multiply(deltaQuat);
         this.group.quaternion.normalize();
 
-        // Vizuális roll (csak kozmetikai, nem hat a mozgásra)
         let targetRoll = yaw * 18;
         targetRoll = Math.max(-0.6, Math.min(0.6, targetRoll));
         this._currentRoll += (targetRoll - this._currentRoll) * 0.12;
         this.visualGroup.rotation.set(0, 0, this._currentRoll * 0.6);
 
-        // Előre mozgás
         const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(this.group.quaternion);
         this.group.position.addScaledVector(forward, this.speed);
     }

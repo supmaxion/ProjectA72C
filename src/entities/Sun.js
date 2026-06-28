@@ -7,6 +7,8 @@ export function createSun({
     size = SUN.size,
     color = SUN.color,
     lightIntensity = SUN.lightIntensity,
+    ambientColor = SUN.ambientColor,
+    ambientIntensity = SUN.ambientIntensity,
 } = {}) {
 
     // --- GÖMB MESH (körbehajózható, depth-helyes) ---
@@ -86,8 +88,10 @@ export function createSun({
 
     // --- DIRECTIONAL LIGHT ---
     const light = new THREE.DirectionalLight(color, lightIntensity);
-    light.position.copy(direction);
+    light.position.set(0, 0, 1);
     light.target.position.set(0, 0, 0);
 
-    return { mesh, glow, light };
+    const ambientLight = new THREE.AmbientLight(ambientColor, ambientIntensity);
+
+    return { mesh, glow, light, ambientLight };
 }

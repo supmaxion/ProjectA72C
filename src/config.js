@@ -6,6 +6,8 @@ export const SUN = {
     size: 900,
     color: 0xffddaa,
     lightIntensity: 2.0,
+    ambientColor: 0x334466,
+    ambientIntensity: 1.5,
 };
 
 export const PLANET = {
@@ -26,6 +28,7 @@ export const SHIP = {
     minSpeed: 0.0000001,
     maxSpeed: 9999,
     scrollAcceleration: 0.5,  // sebesség-változás görgőegységenként
+    modelSize: 20, 
 };
 
 export const CAMERA = {
