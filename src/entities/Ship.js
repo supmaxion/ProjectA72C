@@ -5,28 +5,47 @@ import { SHIP } from '../config.js';
 
 const modelPath = import.meta.env.BASE_URL + 'models/ufo.obj';
 
+
+/**
+ * The player ship.
+ *
+ * Rotation architecture (important, do not "simplify" without re-reading):
+ *
+ * - `this.group` is the ship's TRUE position and movement orientation.
+ *   It only ever receives pitch and yaw, applied as small per-frame
+ *   deltas in the ship's OWN local space (`quaternion.multiply`, not
+ *   premultiply). There is no stored Euler state and no clamping, so
+ *   this can never enter gimbal lock, and the ship can pitch through
+ *   a full loop without restriction.
+ *
+ * - `this.visualGroup` is a child of `this.group` and holds only the
+ *   visible meshes. ONLY this group receives roll (banking into
+ *   turns), applied as a simple, smoothed rotation.z. This is purely
+ *   cosmetic -- it never affects movement direction or the camera,
+ *   which is exactly why the camera in core/camera.js can stay simple
+ *   and stable: it reads `this.group.quaternion`, which is guaranteed
+ *   roll-free.
+ *
+ * This split (movement orientation vs. visual orientation) is what
+ * fixes the "world tilts instead of the ship" and "camera flips at
+ * 90 degrees" issues that a naive single-quaternion approach runs
+ * into.
+ */
 export class Ship {
-    constructor(physicsWorld) {
-        // --- THREE.JS GROUPS ---
+    constructor() {
         this.group = new THREE.Group();
         this.group.position.copy(SHIP.startPosition);
 
         this.visualGroup = new THREE.Group();
         this.group.add(this.visualGroup);
 
-        // Modell betöltése
-        this._modelLoaded = false;
-        this._loadModel();
+        this._buildMeshes();
 
+        this.speed = SHIP.speed;
+        this._minSpeed = SHIP.minSpeed;
+        this._maxSpeed = SHIP.maxSpeed;
+        this._scrollAcceleration = SHIP.scrollAcceleration;
         this._currentRoll = 0;
-
-        // --- RAPIER RIGID BODY ---
-        this._body = physicsWorld.createShipBody(SHIP.startPosition);
-
-        // Scroll-based thrust level
-        this._thrustLevel = SHIP.speed;
-
-        this._velocity = new THREE.Vector3();
     }
 
     /**
@@ -101,17 +120,6 @@ export class Ship {
         console.log('OBJ modell hozzáadva a hajóhoz!');
     }
 
-    /**
-     * Tartalék geometriai hajó, ha az OBJ nem tölthető be
-     */
-    _buildMeshes() {
-        // Itt hozd létre a saját geometriai hajódat
-        // Vagy meghívhatod a régi buildShipMeshes-t
-        import('./Ship.shape.js').then(module => {
-            module.buildShipMeshes(this.visualGroup);
-        });
-    }
-
     get position() {
         return this.group.position;
     }
@@ -121,59 +129,40 @@ export class Ship {
     }
 
     /**
-     * Called every frame BEFORE physicsWorld.step().
+     * Advances the ship's rotation and position by one frame.
+     *
+     *   rotation input (e.g. from MouseLook.consume()).
      */
     update(input) {
         const { yaw, pitch, scroll } = input;
 
-        // --- ROTATION ---
+        // Scroll: positive deltaY = scroll down = decelerate
+        if (scroll !== 0) {
+            this.speed -= Math.sign(scroll) * this._scrollAcceleration;
+        }
+        this.speed = Math.max(this._minSpeed, Math.min(this._maxSpeed, this.speed));
+
+        // --- TRUE movement orientation: pitch + yaw only, no roll ---
+
         const deltaEuler = new THREE.Euler(pitch, yaw, 0, 'XYZ');
         const deltaQuat = new THREE.Quaternion().setFromEuler(deltaEuler);
         this.group.quaternion.multiply(deltaQuat);
         this.group.quaternion.normalize();
 
-        // Visual roll
+        // --- Visual-only roll (banking), smoothed to avoid jitter ---
+        // Raw per-frame mouse deltas are noisy; smoothing the roll
+        // target (rather than deriving roll from a raw frame-to-frame
+        // rate) avoids the shaking that a naive derivative produces.
         let targetRoll = yaw * 18;
         targetRoll = Math.max(-0.6, Math.min(0.6, targetRoll));
         this._currentRoll += (targetRoll - this._currentRoll) * 0.12;
         this.visualGroup.rotation.set(0, 0, this._currentRoll * 0.6);
 
-        // --- THRUST LEVEL (scroll) ---
-        if (scroll !== 0) {
-            this._thrustLevel -= Math.sign(scroll) * SHIP.scrollAcceleration;
-            this._thrustLevel = Math.max(
-                SHIP.minSpeed,
-                Math.min(SHIP.maxSpeed, this._thrustLevel)
-            );
-        }
 
-        // --- MOZGÁS ---
-        const forward = new THREE.Vector3(0, 0, -1)
-            .applyQuaternion(this.group.quaternion);
 
-        const forwardSpeed = this._velocity.dot(forward);
-        const gravityDrift = this._velocity.clone()
-            .addScaledVector(forward, -forwardSpeed);
-
-        this._velocity.copy(gravityDrift)
-            .addScaledVector(forward, this._thrustLevel);
-
-        this.group.position.add(this._velocity);
-    }
-            
-    applyGravityForce(force) {
-        this._velocity.add(force);
-    }
-
-    /**
-     * Called every frame AFTER physicsWorld.step().
-     */
-    syncFromPhysics() {
-        const pos = this._body.translation();
-        this.group.position.set(pos.x, pos.y, pos.z);
-    }
-
-    getRigidBody() {
-        return this._body;
+        // --- Move forward along the ship's current facing direction ---
+        const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(this.group.quaternion);
+        this.group.position.addScaledVector(forward, this.speed);
     }
 }
+

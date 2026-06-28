@@ -5,28 +5,32 @@ import { Ship } from './entities/Ship.js';
 import { createSun } from './entities/Sun.js';
 import { createDustField } from './entities/DustField.js';
 import { SolarSystem } from './entities/SolarSystem.js';
-import { PhysicsWorld } from './physics/PhysicsWorld.js';
-import { GravitySystem } from './physics/GravitySystem.js';
 import { MouseLook } from './controls/MouseLook.js';
 import { getOverlayElements } from './ui/overlay.js';
 import { SUN, DUST_FIELD } from './config.js';
 import { spawnBackgroundObjects } from './entities/BackgroundObject.js';
+import { createPlanet } from './entities/Planet.js';
+import { createStarField } from './entities/StarField.js';
+import { MouseLook } from './controls/MouseLook.js';
+import { getOverlayElements } from './ui/overlay.js';
+import { SUN, PLANET, STAR_FIELD } from './config.js';
 
-async function init() {
-    // --- CORE ---
-    const scene = createScene();
-    const camera = createCamera();
-    const renderer = createRenderer(camera);
+// --- SCENE / CAMERA / RENDERER ---
+const scene = createScene();
+const camera = createCamera();
+const renderer = createRenderer(camera);
 
-    // --- PHYSICS (must init before any entity that needs it) ---
-    const physicsWorld = new PhysicsWorld();
-    await physicsWorld.init();
+// --- ENTITIES ---
+const ship = new Ship();
+scene.add(ship.group);
 
-    const gravitySystem = new GravitySystem(physicsWorld);
+const { sprite: sunSprite, light: sunLight } = createSun(SUN);
+scene.add(sunSprite);
+scene.add(sunLight);
+scene.add(sunLight.target);
 
-    // --- ENTITIES ---
-    const ship = new Ship(physicsWorld);
-    scene.add(ship.group);
+const planet = createPlanet(PLANET);
+scene.add(planet);
 
     const { mesh, glow, light } = createSun();
     scene.add(mesh);
@@ -36,9 +40,19 @@ async function init() {
 
     const dustField = createDustField(DUST_FIELD);
     scene.add(dustField);
+const starField = createStarField(STAR_FIELD);
+scene.add(starField);
 
-    // SolarSystem builds all planets + moons, registers gravity attractors
-    const solarSystem = new SolarSystem(scene, physicsWorld, gravitySystem);
+// --- CONTROLS ---
+const { clickToStart } = getOverlayElements();
+const mouseLook = new MouseLook({
+    clickToStartEl: clickToStart,
+    domElement: renderer.domElement,
+});
+
+// --- ANIMATION LOOP ---
+function animate() {
+    const input = mouseLook.consume();
 
     const backgroundObjects = spawnBackgroundObjects(scene);
 
@@ -88,15 +102,19 @@ async function init() {
         
         backgroundObjects.forEach(obj => obj.update(delta, camera.position));
 
-        gravitySystem.applyToVelocity(ship);  // ← ez, nem applyTo()
-        // gravitySystem.applyTo(ship.getRigidBody());  ← kommenteld ki
-        
-        
         renderer.render(scene, camera);
     }
 
     animate();
     console.log('🚀 Project-A72C started');
+    ship.update(input);
+    updateCameraFollow(camera, ship);
+
+    renderer.render(scene, camera);
+
+    requestAnimationFrame(animate);
 }
 
-init().catch(console.error);
+animate();
+
+console.log('🚀 3D spaceship started (mouse capture, gimbal-lock-free rotation)!');

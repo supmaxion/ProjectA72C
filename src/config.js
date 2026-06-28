@@ -23,11 +23,9 @@ export const DUST_FIELD = {
 export const SHIP = {
     startPosition: new THREE.Vector3(0, 3000, 10000),
     speed: 0.045,
-    minSpeed: 0.000001,
+    minSpeed: 0.0000001,
     maxSpeed: 9999,
-    scrollAcceleration: 0.5,  // sebesség-változás görgőegységenként 0,005
-    thrustForce: 2,      // hajtóerő nagysága impulzusban
-    mass: 1.0,
+    scrollAcceleration: 0.5,  // sebesség-változás görgőegységenként
 };
 
 export const CAMERA = {
@@ -35,10 +33,6 @@ export const CAMERA = {
     near: 1,
     far: 1000000,
     offsetLocal: new THREE.Vector3(0, 3, 30),//0,5,18
-};
-export const GRAVITY = {
-    G: 0.5,
-    scale: 1,
 };
 
 export const SOLAR_SYSTEM = {
@@ -357,4 +351,5 @@ export const ORBIT_TRAIL = {
     trailMaxPoints:   300,     // max tárolt pont
     trailMaxOpacity:  1.5,     // trail legfényesebb pontja
     minDistance:      5,       // minimum elmozdulás új pont felvételéhez
+    offsetLocal: new THREE.Vector3(0, 5, 18),
 };
