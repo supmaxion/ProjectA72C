@@ -20,7 +20,6 @@ export class SolarSystem {
         for (const bodyConfig of SOLAR_SYSTEM.bodies) {
             const planet = new CelestialBody({
                 name:        bodyConfig.name,
-                mass:        bodyConfig.mass,
                 radius:      bodyConfig.radius,
                 color:       bodyConfig.color,
                 orbit:       bodyConfig.orbit,
@@ -42,7 +41,6 @@ export class SolarSystem {
                 for (const moonConfig of bodyConfig.moons) {
                     const moon = new CelestialBody({
                         name:        moonConfig.name,
-                        mass:        moonConfig.mass,
                         radius:      moonConfig.radius,
                         color:       moonConfig.color,
                         orbit:       moonConfig.orbit,

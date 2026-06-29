@@ -42,13 +42,11 @@ export const CAMERA = {
 
 export const SOLAR_SYSTEM = {
     sun: {
-        mass: 2000,
         position: new THREE.Vector3(0, 0, 0),
     },
     bodies: [
         {
             name: 'planet-alpha',
-            mass: 15,
             radius: 60,
             color: 0x44dd88,
             orbit: {
@@ -60,7 +58,6 @@ export const SOLAR_SYSTEM = {
             moons: [
                 {
                     name: 'moon-alpha-1',
-                    mass: 1,
                     radius: 15,
                     color: 0xaaaaaa,
                     orbit: {
@@ -74,7 +71,6 @@ export const SOLAR_SYSTEM = {
         },
         {
             name: 'planet-beta',
-            mass: 8,
             radius: 35,
             color: 0xff6644,
             orbit: {
@@ -87,7 +83,6 @@ export const SOLAR_SYSTEM = {
         },
         {
             name: 'planet-gamma',
-            mass: 6,
             radius: 28,
             color: 0x66ccff,
             orbit: {
@@ -99,7 +94,6 @@ export const SOLAR_SYSTEM = {
             moons: [
                 {
                     name: 'gamma-moon-1',
-                    mass: 1,
                     radius: 12,
                     color: 0xb0b0b0,
                     orbit: {
@@ -113,7 +107,6 @@ export const SOLAR_SYSTEM = {
         },
         {
             name: 'planet-delta',
-            mass: 10,
             radius: 42,
             color: 0xaaff66,
             orbit: {
@@ -125,7 +118,6 @@ export const SOLAR_SYSTEM = {
             moons: [
                 {
                     name: 'delta-moon-1',
-                    mass: 1,
                     radius: 10,
                     color: 0x9a9a9a,
                     orbit: {
@@ -137,7 +129,6 @@ export const SOLAR_SYSTEM = {
                 },
                 {
                     name: 'delta-moon-2',
-                    mass: 2,
                     radius: 14,
                     color: 0xc0c0c0,
                     orbit: {
@@ -151,7 +142,6 @@ export const SOLAR_SYSTEM = {
         },
         {
             name: 'planet-epsilon',
-            mass: 4,
             radius: 22,
             color: 0xffcc00,
             orbit: {
@@ -164,7 +154,6 @@ export const SOLAR_SYSTEM = {
         },
         {
             name: 'planet-zeta',
-            mass: 9,
             radius: 38,
             color: 0xcc66ff,
             orbit: {
@@ -176,7 +165,6 @@ export const SOLAR_SYSTEM = {
             moons: [
                 {
                     name: 'zeta-moon-1',
-                    mass: 1,
                     radius: 11,
                     color: 0xaaaaaa,
                     orbit: {
@@ -190,7 +178,6 @@ export const SOLAR_SYSTEM = {
         },
         {
             name: 'planet-eta',
-            mass: 7,
             radius: 33,
             color: 0xff3366,
             orbit: {
@@ -202,7 +189,6 @@ export const SOLAR_SYSTEM = {
             moons: [
                 {
                     name: 'eta-moon-1',
-                    mass: 1,
                     radius: 9,
                     color: 0x8f8f8f,
                     orbit: {
@@ -214,7 +200,6 @@ export const SOLAR_SYSTEM = {
                 },
                 {
                     name: 'eta-moon-2',
-                    mass: 1,
                     radius: 13,
                     color: 0xbdbdbd,
                     orbit: {
@@ -226,7 +211,6 @@ export const SOLAR_SYSTEM = {
                 },
                 {
                     name: 'eta-moon-3',
-                    mass: 2,
                     radius: 16,
                     color: 0xd0d0d0,
                     orbit: {
@@ -240,7 +224,6 @@ export const SOLAR_SYSTEM = {
         },
         {
             name: 'planet-theta',
-            mass: 12,
             radius: 50,
             color: 0x33ffee,
             orbit: {
@@ -253,7 +236,6 @@ export const SOLAR_SYSTEM = {
         },
         {
             name: 'planet-iota',
-            mass: 5,
             radius: 26,
             color: 0xff8844,
             orbit: {
@@ -265,7 +247,6 @@ export const SOLAR_SYSTEM = {
             moons: [
                 {
                     name: 'iota-moon-1',
-                    mass: 1,
                     radius: 10,
                     color: 0xa0a0a0,
                     orbit: {
@@ -279,7 +260,6 @@ export const SOLAR_SYSTEM = {
         },
         {
             name: 'planet-kappa',
-            mass: 11,
             radius: 46,
             color: 0x4488ff,
             orbit: {
@@ -291,7 +271,6 @@ export const SOLAR_SYSTEM = {
             moons: [
                 {
                     name: 'kappa-moon-1',
-                    mass: 2,
                     radius: 14,
                     color: 0xb5b5b5,
                     orbit: {
@@ -303,7 +282,6 @@ export const SOLAR_SYSTEM = {
                 },
                 {
                     name: 'kappa-moon-2',
-                    mass: 1,
                     radius: 11,
                     color: 0xdcdcdc,
                     orbit: {
