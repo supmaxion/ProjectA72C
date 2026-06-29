@@ -21,7 +21,7 @@ export function keplerPosition(
     orbit,
     time,
     center = new THREE.Vector3(),
-    target = new THREE.Vector3()  // ← ÚJ: opcionális target, elkerüli az allokációt
+    target = new THREE.Vector3()
 ) {
     const { semiMajorAxis, eccentricity, inclination, speed } = orbit;
 
@@ -34,7 +34,7 @@ export function keplerPosition(
     const y = z * Math.sin(inclination);
     const zTilted = z * Math.cos(inclination);
 
-    return target.set(          // ← volt: new THREE.Vector3(...)
+    return target.set(
         center.x + x,
         center.y + y,
         center.z + zTilted

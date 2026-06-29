@@ -1,5 +1,10 @@
 import * as THREE from 'three';
 
+
+export const GAME_START = {
+    blink: false,
+};
+
 export const SUN = {
     direction: new THREE.Vector3(0,0,0),
     distance: 0,

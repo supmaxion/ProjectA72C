@@ -4,14 +4,12 @@ import { keplerPosition } from '../physics/OrbitalMechanics.js';
 export class CelestialBody {
     constructor({
         name,
-        mass,
         radius,
         color,
         orbit,
         orbitCenter,
     }) {
         this.name = name;
-        this.mass = mass;
         this.orbit = orbit;
         this.orbitCenter = orbitCenter;
         this.position = new THREE.Vector3();
@@ -36,8 +34,11 @@ export class CelestialBody {
             wireframe: true,
         });
         this.group.add(new THREE.Mesh(glowGeo, glowMat));
+        this.group.add(this.createWireShells(radius, 4));
 
         this._phaseOffset = orbit.phaseOffset ?? (Math.random() * Math.PI * 2 / orbit.speed);
+
+
     }
 
     update(time) {
@@ -48,5 +49,31 @@ export class CelestialBody {
         for (const moon of this.moons) {
             moon.update(time);
         }
+    }
+
+
+    // Creates a set of wireframe shells around the celestial body to give it a glowing effect.
+    createWireShells(radius, layers = 4) {
+        const group = new THREE.Group();
+
+        for (let i = 1; i <= layers; i++) {
+            const scale = 2 + i * 0.8; // rétegek távolsága
+            const geo = new THREE.SphereGeometry(radius * scale, 16, 16);
+
+            const wire = new THREE.WireframeGeometry(geo);
+
+            const line = new THREE.LineSegments(
+                wire,
+                new THREE.LineBasicMaterial({
+                    color: 0x88ccff,
+                    transparent: true,
+                    opacity: 0.1 / i, // kifelé halványabb
+                })
+            );
+
+            group.add(line);
+        }
+
+        return group;
     }
 }

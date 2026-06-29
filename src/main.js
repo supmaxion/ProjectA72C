@@ -8,7 +8,7 @@ import { SolarSystem } from './entities/SolarSystem.js';
 import { MouseLook } from './controls/MouseLook.js';
 import { getOverlayElements } from './ui/overlay.js';
 import { spawnBackgroundObjects } from './entities/BackgroundObject.js';
-import { DUST_FIELD } from './config.js';
+import { DUST_FIELD, GAME_START } from './config.js';
 import { Blink } from './ui/Blink.js';
 import { RippleOverlay } from './ui/RippleOverlay.js';
 
@@ -72,14 +72,17 @@ async function init() {
     animate();
 
     //pislogás és hullám animáció
-    const blink = new Blink({ delay: 500 });
-    const rippleOverlay = new RippleOverlay();
-    setTimeout(() => {
-        rippleOverlay.ripple({ x: 70, y: 30, text: 'I should click' });
-    }, 6000);
-    setTimeout(() => {
-        rippleOverlay.ripple({ x: 50, y: 30, text: 'I can use "esc"' });
-    }, 16000);
+    if (GAME_START.blink) {
+        const blink = new Blink({ delay: 500 });
+        const rippleOverlay = new RippleOverlay();
+        setTimeout(() => {
+            rippleOverlay.ripple({ x: 70, y: 30, text: 'I should click' });
+        }, 6000);
+        setTimeout(() => {
+            rippleOverlay.ripple({ x: 50, y: 30, text: 'I can use "esc"' });
+        }, 16000);
+    }
+
     console.log('🚀 Project-A72C started');
 }
 
