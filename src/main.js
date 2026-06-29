@@ -64,6 +64,7 @@ async function init() {
         solarSystem.update();
         updateCameraFollow(camera, ship);
 
+        //todo ezen miért kell framenként menni?
         backgroundObjects.forEach(obj => obj.update(delta, camera.position));
 
         renderer.render(scene, camera);
