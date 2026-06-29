@@ -9,6 +9,7 @@ import { MouseLook } from './controls/MouseLook.js';
 import { getOverlayElements } from './ui/overlay.js';
 import { spawnBackgroundObjects } from './entities/BackgroundObject.js';
 import { DUST_FIELD } from './config.js';
+import { Blink } from './ui/Blink.js';
 
 async function init() {
     // --- CORE ---
@@ -68,6 +69,9 @@ async function init() {
     }
 
     animate();
+
+    const blink = new Blink({ delay: 500 });
+
     console.log('🚀 Project-A72C started');
 }
 
