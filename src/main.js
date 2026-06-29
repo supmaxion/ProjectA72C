@@ -10,6 +10,7 @@ import { getOverlayElements } from './ui/overlay.js';
 import { spawnBackgroundObjects } from './entities/BackgroundObject.js';
 import { DUST_FIELD } from './config.js';
 import { Blink } from './ui/Blink.js';
+import { RippleOverlay } from './ui/RippleOverlay.js';
 
 async function init() {
     // --- CORE ---
@@ -70,8 +71,15 @@ async function init() {
 
     animate();
 
+    //pislogás és hullám animáció
     const blink = new Blink({ delay: 500 });
-
+    const rippleOverlay = new RippleOverlay();
+    setTimeout(() => {
+        rippleOverlay.ripple({ x: 70, y: 30, text: 'I should click' });
+    }, 4000);
+    setTimeout(() => {
+        rippleOverlay.ripple({ x: 50, y: 30, text: 'I can use "esc"' });
+    }, 12000);
     console.log('🚀 Project-A72C started');
 }
 
