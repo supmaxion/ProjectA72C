@@ -40,14 +40,14 @@ export class Blink {
         this._svg.innerHTML = `
             <defs>
                 <linearGradient id="blinkGradTop" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%"   stop-color="#0a0520"/>
-                    <stop offset="60%"  stop-color="#1a0a3e"/>
-                    <stop offset="100%" stop-color="#2d1060" stop-opacity="0.85"/>
+                    <stop offset="0%"   stop-color="#000000"/>
+                    <stop offset="60%"  stop-color="#0a0807"/>
+                    <stop offset="100%" stop-color="#0c0705" stop-opacity="0.85"/>
                 </linearGradient>
                 <linearGradient id="blinkGradBot" x1="0" y1="1" x2="0" y2="0">
-                    <stop offset="0%"   stop-color="#0a0520"/>
-                    <stop offset="60%"  stop-color="#1a0a3e"/>
-                    <stop offset="100%" stop-color="#2d1060" stop-opacity="0.85"/>
+                    <stop offset="0%"   stop-color="#000000"/>
+                    <stop offset="60%"  stop-color="#0a0807"/>
+                    <stop offset="100%" stop-color="#0c0705" stop-opacity="0.85"/>
                 </linearGradient>
                 <filter id="blinkBlur">
                     <feGaussianBlur stdDeviation="0.8"/>
