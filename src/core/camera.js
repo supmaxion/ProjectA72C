@@ -11,8 +11,9 @@ export function createCamera() {
         CAMERA.near,
         CAMERA.far  // far plane: keep well beyond the star field spread
     );
-    camera.position.set(0, 3, 15);
-    camera.lookAt(0, 0, 0);
+    // camera.position.set(0, 3, 15);
+    // camera.rotation.x = CAMERA.rotationX;
+    // camera.lookAt(0, 0, 0);
     return camera;
 }
 
@@ -42,4 +43,12 @@ export function updateCameraFollow(camera, ship) {
 
     camera.position.copy(ship.position).add(offsetWorld);
     camera.quaternion.copy(ship.quaternion);
+
+    // plusz kamera pitch
+    const pitchQuat = new THREE.Quaternion().setFromAxisAngle(
+        new THREE.Vector3(1, 0, 0),
+        CAMERA.rotationX
+    );
+
+    camera.quaternion.multiply(pitchQuat);
 }

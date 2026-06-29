@@ -42,10 +42,6 @@ export class MouseLook {
 
     _onPointerLockChange() {
         this.isLocked = document.pointerLockElement === this._domElement;
-
-        if (this._clickToStartEl) {
-            this._clickToStartEl.style.display = this.isLocked ? 'none' : 'block';
-        }
     }
 
     _onMouseMove(event) {

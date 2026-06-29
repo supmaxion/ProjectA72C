@@ -24,18 +24,20 @@ export const DUST_FIELD = {
 
 export const SHIP = {
     startPosition: new THREE.Vector3(0, 3000, 10000),
-    speed: 0.045,
+    speed: 0.45,
     minSpeed: 0.0000001,
     maxSpeed: 9999,
     scrollAcceleration: 0.5,  // sebesség-változás görgőegységenként
-    modelSize: 20, 
+    modelSize: 15, 
+    modelRotationX: -0.2, 
 };
 
 export const CAMERA = {
     fov: 60,
     near: 1,
     far: 1000000,
-    offsetLocal: new THREE.Vector3(0, 3, 30),//0,5,18
+    offsetLocal: new THREE.Vector3(0, 11, 30),//0,5,18
+    rotationX: THREE.MathUtils.degToRad(-20),
 };
 
 export const SOLAR_SYSTEM = {

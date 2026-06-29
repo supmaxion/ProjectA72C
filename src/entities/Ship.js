@@ -28,7 +28,7 @@ export class Ship {
             (gltf) => {
                 const model = gltf.scene;
                 model.rotation.y = Math.PI;
-                model.rotation.x = 0.1;
+                model.rotation.x = SHIP.modelRotationX;
                 model.position.set(0, 0, 0);
 
                 // Automatikus méretezés
@@ -38,32 +38,26 @@ export class Ship {
                 model.scale.setScalar(scale);
 
                 // Anyagok finomítása (megtartja az eredeti textúrákat)
-                model.traverse((child) => {
-
-                    if (child.isMesh) {
-    console.log(child.name, child.material?.type);
-}
-
-
-                    if (child.isMesh) {
-                        child.castShadow = true;
-                        child.receiveShadow = true;
+                // model.traverse((child) => {
+                //     if (child.isMesh) {
+                        // child.castShadow = true;
+                        // child.receiveShadow = true;
                        
-if (child.material) {
-    // van anyag — módosítjuk
-    child.material.metalness = 0.8;
-    child.material.roughness = 0.2;
-    child.material.envMapIntensity = 1.0;
-} else {
-    // nincs anyag — létrehozunk egyet
-    child.material = new THREE.MeshStandardMaterial({
-        color: 0xaaaaaa,
-        metalness: 0.8,
-        roughness: 0.2,
-    });
-}
-                    }
-                });
+                        // if (child.material) {
+                        //     // van anyag — módosítjuk
+                        //     child.material.metalness = 0.8;
+                        //     child.material.roughness = 0.2;
+                        //     child.material.envMapIntensity = 1.0;
+                        // } else {
+                        //     // nincs anyag — létrehozunk egyet
+                        //     child.material = new THREE.MeshStandardMaterial({
+                        //         color: 0xaaaaaa,
+                        //         metalness: 0.8,
+                        //         roughness: 0.2,
+                        //     });
+                        // }
+                //     }
+                // });
 
                 this.visualGroup.add(model);
                 console.log(`GLB modell betöltve! Méret: ${size.toFixed(2)}, skála: ${scale.toFixed(4)}`);
