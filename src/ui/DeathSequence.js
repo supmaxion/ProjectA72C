@@ -1,7 +1,12 @@
+import { RestApi } from '../RestApi'
+
 export class DeathSequence {
     constructor() {
         this._injectStyles();
         this._buildDom();
+
+        RestApi('Hit');
+
     }
 
     _injectStyles() {

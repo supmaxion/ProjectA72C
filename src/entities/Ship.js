@@ -9,6 +9,12 @@ export class Ship {
         this.group = new THREE.Group();
         this.group.position.copy(SHIP.startPosition);
 
+        // Kezdő irány: a hajó nézzen a Nap (origó) felé, ne pusztán -Z irányba
+        const target = new THREE.Vector3(0, 0, 0);
+        const forward = new THREE.Vector3().subVectors(target, this.group.position).normalize();
+        const defaultForward = new THREE.Vector3(0, 0, -1);
+        this.group.quaternion.setFromUnitVectors(defaultForward, forward);
+
         this.visualGroup = new THREE.Group();
         this.group.add(this.visualGroup);
 
@@ -36,28 +42,6 @@ export class Ship {
                 const size = box.getSize(new THREE.Vector3()).length();
                 const scale = SHIP.modelSize / size;
                 model.scale.setScalar(scale);
-
-                // Anyagok finomítása (megtartja az eredeti textúrákat)
-                // model.traverse((child) => {
-                //     if (child.isMesh) {
-                        // child.castShadow = true;
-                        // child.receiveShadow = true;
-                       
-                        // if (child.material) {
-                        //     // van anyag — módosítjuk
-                        //     child.material.metalness = 0.8;
-                        //     child.material.roughness = 0.2;
-                        //     child.material.envMapIntensity = 1.0;
-                        // } else {
-                        //     // nincs anyag — létrehozunk egyet
-                        //     child.material = new THREE.MeshStandardMaterial({
-                        //         color: 0xaaaaaa,
-                        //         metalness: 0.8,
-                        //         roughness: 0.2,
-                        //     });
-                        // }
-                //     }
-                // });
 
                 this.visualGroup.add(model);
                 console.log(`GLB modell betöltve! Méret: ${size.toFixed(2)}, skála: ${scale.toFixed(4)}`);

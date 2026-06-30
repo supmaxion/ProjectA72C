@@ -2,7 +2,7 @@ import * as THREE from 'three';
 
 
 export const GAME_START = {
-    blink: false,
+    blink: true,
 };
 
 export const CELESTIAL = {
