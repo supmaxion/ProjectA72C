@@ -11,12 +11,15 @@ import { spawnBackgroundObjects } from './entities/BackgroundObject.js';
 import { DUST_FIELD, GAME_START } from './config.js';
 import { Blink } from './ui/Blink.js';
 import { RippleOverlay } from './ui/RippleOverlay.js';
+import { Hud } from './ui/Hud.js';
 
 async function init() {
     // --- CORE ---
     const scene    = createScene();
     const camera   = createCamera();
     const renderer = createRenderer(camera);
+    const hud = new Hud();
+// hud.updateBox('tl-1', { label: 'SPEED', value: '0.4' });
 
     // --- ENTITIES ---
     const ship = new Ship();
@@ -50,6 +53,13 @@ async function init() {
         if (e.key === 't' || e.key === 'T') {
             orbitLinesVisible = !orbitLinesVisible;
             solarSystem.setOrbitLinesVisible(orbitLinesVisible);
+        }
+    });
+
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Tab') {
+            e.preventDefault();
+            hud.cycleActiveBox(e.shiftKey ? -1 : 1);
         }
     });
 
