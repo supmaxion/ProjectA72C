@@ -12,6 +12,8 @@ import { DUST_FIELD, GAME_START } from './config.js';
 import { Blink } from './ui/Blink.js';
 import { RippleOverlay } from './ui/RippleOverlay.js';
 import { Hud } from './ui/Hud.js';
+import { checkShipCollision } from './physics/CollisionSystem.js';
+import { DeathSequence } from './ui/DeathSequence.js';
 
 async function init() {
     // --- CORE ---
@@ -25,7 +27,7 @@ async function init() {
     const ship = new Ship();
     scene.add(ship.group);
 
-    const { mesh, glow, light, ambientLight } = createSun();
+    const { mesh, glow, light, ambientLight, collider: sunCollider } = createSun();
     scene.add(mesh);
     scene.add(glow);
     scene.add(light);
@@ -36,6 +38,10 @@ async function init() {
     scene.add(dustField);
 
     const solarSystem = new SolarSystem(scene);
+    
+    // --- DEATH SEQUENCE ---
+    const deathSequence = new DeathSequence();
+    let isGameOver = false;
 
     const backgroundObjects = spawnBackgroundObjects(scene);
 
@@ -68,6 +74,12 @@ async function init() {
         requestAnimationFrame(animate);
 
         const delta = clock.getDelta();
+
+        if (isGameOver) {
+            renderer.render(scene, camera);
+            return;
+        }
+
         const input = mouseLook.consume();
 
         ship.update(input);
@@ -76,6 +88,14 @@ async function init() {
 
         //todo claude! Válaszolj erre a kérdésre: ezen miért kell framenként menni?
         backgroundObjects.forEach(obj => obj.update(delta, camera.position));
+
+        // Ütközésvizsgálat a hajó és a bolygók/holdak között
+        const hitBody = checkShipCollision(ship.position, [...solarSystem.getBodies(), sunCollider]);
+        if (hitBody) {
+            isGameOver = true;
+            deathSequence.trigger();
+            console.log(`💥 Ütközés: ${hitBody.name}`);
+        }
 
         renderer.render(scene, camera);
     }

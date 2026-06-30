@@ -79,4 +79,8 @@ export class SolarSystem {
             line.visible = visible;
         }
     }
+
+    getBodies() {
+        return this._planets;
+    }
 }

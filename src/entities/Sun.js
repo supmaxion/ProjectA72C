@@ -93,5 +93,15 @@ export function createSun({
 
     const ambientLight = new THREE.AmbientLight(ambientColor, ambientIntensity);
 
-    return { mesh, glow, light, ambientLight };
+    return {
+        mesh,
+        glow,
+        light,
+        ambientLight,
+        collider: {
+            name: 'Sun',
+            position: mesh.position,
+            radius: size * 0.5,
+        },
+    };
 }

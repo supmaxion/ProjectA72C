@@ -13,6 +13,7 @@ export class CelestialBody {
         this.name = name;
         this.orbit = orbit;
         this.orbitCenter = orbitCenter;
+        this.radius = radius;
         this.position = new THREE.Vector3();
         this.moons = [];
 
