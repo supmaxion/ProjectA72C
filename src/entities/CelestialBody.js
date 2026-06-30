@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { keplerPosition } from '../physics/OrbitalMechanics.js';
+import { CELESTIAL } from '../config.js';
 
 export class CelestialBody {
     constructor({
@@ -34,20 +35,30 @@ export class CelestialBody {
             wireframe: true,
         });
         this.group.add(new THREE.Mesh(glowGeo, glowMat));
-        this.group.add(this.createWireShells(radius, 4));
+
+        this.wireShells = this.createWireShells(radius, 4);
+        this.group.add(this.wireShells);
+
+        // A shell-ek csak ennyi távolságon belül legyenek láthatóak (kamerától mérve)
+        this.shellVisibleDistance = CELESTIAL.wireShellVisibleDistanceMultiplier * radius;
 
         this._phaseOffset = orbit.phaseOffset ?? (Math.random() * Math.PI * 2 / orbit.speed);
 
 
     }
 
-    update(time) {
+    update(time, cameraPosition) {
         keplerPosition(this.orbit, time + this._phaseOffset, this.orbitCenter, this.position);
 
         this.group.position.copy(this.position);
 
+        if (cameraPosition && this.wireShells) {
+            const dist = this.position.distanceTo(cameraPosition);
+            this.wireShells.visible = dist < this.shellVisibleDistance;
+        }
+
         for (const moon of this.moons) {
-            moon.update(time);
+            moon.update(time, cameraPosition);
         }
     }
 

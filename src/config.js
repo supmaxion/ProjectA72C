@@ -5,6 +5,10 @@ export const GAME_START = {
     blink: false,
 };
 
+export const CELESTIAL = {
+    wireShellVisibleDistanceMultiplier: 100,
+};
+
 export const SUN = {
     direction: new THREE.Vector3(0,0,0),
     distance: 0,

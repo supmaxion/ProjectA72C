@@ -61,12 +61,12 @@ export class SolarSystem {
         }
     }
 
-    update() {
+    update(cameraPosition) {
         this._time++;
         const now = performance.now() / 1000;
 
         for (const planet of this._planets) {
-            planet.update(this._time);
+            planet.update(this._time, cameraPosition);
         }
 
         for (const { trail, body } of this._trails) {

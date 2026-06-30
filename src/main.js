@@ -71,10 +71,10 @@ async function init() {
         const input = mouseLook.consume();
 
         ship.update(input);
-        solarSystem.update();
+        solarSystem.update(camera.position);
         updateCameraFollow(camera, ship);
 
-        //todo ezen miért kell framenként menni?
+        //todo claude! Válaszolj erre a kérdésre: ezen miért kell framenként menni?
         backgroundObjects.forEach(obj => obj.update(delta, camera.position));
 
         renderer.render(scene, camera);
