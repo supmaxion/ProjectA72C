@@ -5,7 +5,7 @@ export function RestApi( phase ) {
 	
 	//Ha localban vagyunk, ne legyen API hívás
 	if (window.location.hostname === 'localhost' || window.location.port === '5173') {
-			console.log('Localhost környezet észlelve - API hívás kihagyva')
+			// console.log('Localhost környezet észlelve - API hívás kihagyva')
 		return
 	}
 
@@ -39,14 +39,11 @@ export function RestApi( phase ) {
 			
 			if (response.ok) {
 				console.log('Email sent successfully')
-				if (onComplete) onComplete(true)
 			} else {
 				console.log('Failed to send email')
-				if (onComplete) onComplete(false)
 			}
 		} catch (error) {
 			console.log('Error sending email:', error)
-			if (onComplete) onComplete(false)
 		}
 	}
 	

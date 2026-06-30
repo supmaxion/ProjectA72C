@@ -11,7 +11,8 @@
  */
 
 // Font betöltése egyszer, globálisan
-const _fontFace = new FontFace('OverlayFont', 'url(/fonts/font1.ttf)');
+const fontUrl = import.meta.env.BASE_URL + 'fonts/font1.ttf';
+const _fontFace = new FontFace('OverlayFont', `url(${fontUrl})`);
 _fontFace.load().then(f => {
     document.fonts.add(f);
     console.log('Overlay font betöltve.');
