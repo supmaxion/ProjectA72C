@@ -33,7 +33,7 @@ export class AsteroidField {
             mesh.scale.setScalar(size);
             mesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
 
-            const orbitSpeed = (0.0003 + Math.random() * 0.0004) * (Math.random() < 0.5 ? 1 : -1);
+            const orbitSpeed = 0.0003 + Math.random() * 0.0004;
             const spinSpeed = (Math.random() - 0.5) * 0.02;
 
             this.asteroids.push({ mesh, angle, radius, height, orbitSpeed, spinSpeed, size });

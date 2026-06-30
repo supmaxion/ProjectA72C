@@ -61,7 +61,7 @@ async function init() {
     });
 
     // --- TOGGLE ORBIT LINES ---
-    let orbitLinesVisible = true;
+    let orbitLinesVisible = false;
     solarSystem.setOrbitLinesVisible(orbitLinesVisible);
     window.addEventListener('keydown', (e) => {
         if (e.key === 't' || e.key === 'T') {

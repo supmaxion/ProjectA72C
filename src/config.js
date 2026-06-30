@@ -32,7 +32,7 @@ export const DUST_FIELD = {
 };
 
 export const SHIP = {
-    startPosition: new THREE.Vector3(0, 3000, 10000),
+    startPosition: new THREE.Vector3(0, 3000, 50000),
     speed: 0.45,
     minSpeed: 0.0000001,
     maxSpeed: 9999,
@@ -376,9 +376,9 @@ export const MILKY_WAY = {
 };
 
 export const ASTEROID_BELT = {
-    innerRadius: 12000,
-    outerRadius: 14000,
-    count: 250,
+    innerRadius: 25000,
+    outerRadius: 30000,
+    count: 500,
     minSize: 10,
     maxSize: 60,
     color: 0x8a7d6e,
