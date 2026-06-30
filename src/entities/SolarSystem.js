@@ -1,7 +1,10 @@
 import * as THREE from 'three';
 import { CelestialBody } from './CelestialBody.js';
 import { createOrbitLine, DynamicTrail } from './OrbitTrail.js';
-import { SOLAR_SYSTEM } from '../config.js';
+import { Comet, COMET_2 } from './Comet.js';
+import { AsteroidField } from './AsteroidField.js';
+import { SpaceStation } from './SpaceStation.js';
+import { SOLAR_SYSTEM, COMET, ASTEROID_BELT, STATION } from '../config.js';
 
 export class SolarSystem {
     constructor(scene) {
@@ -16,6 +19,25 @@ export class SolarSystem {
             SOLAR_SYSTEM.sun.position.y,
             SOLAR_SYSTEM.sun.position.z,
         );
+
+        //üstökösök
+        this.comet = new Comet({
+            ...COMET,
+            orbitCenter: sunPos,
+        });
+        scene.add(this.comet.group);
+        scene.add(this.comet.orbitLine);
+        this.comet2 = new Comet({ ...COMET_2, orbitCenter: sunPos });
+        scene.add(this.comet2.group);
+        scene.add(this.comet2.orbitLine);
+
+        //aszteroida öv
+        this.asteroidBelt = new AsteroidField({ center: sunPos, ...ASTEROID_BELT });
+        scene.add(this.asteroidBelt.group);
+
+        //űrállomás
+        this.station = new SpaceStation(STATION.position, STATION);
+        scene.add(this.station.group);
 
         for (const bodyConfig of SOLAR_SYSTEM.bodies) {
             const planet = new CelestialBody({
@@ -69,6 +91,10 @@ export class SolarSystem {
             planet.update(this._time, cameraPosition);
         }
 
+        this.comet.update(this._time);
+        this.comet2.update(this._time);
+        this.asteroidBelt.update();
+        this.station.update();
         for (const { trail, body } of this._trails) {
             trail.update(body.position, now);
         }
@@ -78,9 +104,11 @@ export class SolarSystem {
         for (const line of this._orbitLines) {
             line.visible = visible;
         }
+        this.comet.setOrbitLineVisible(visible);
+        this.comet2.setOrbitLineVisible(visible);
     }
 
     getBodies() {
-        return this._planets;
+        return [...this._planets, this.comet, this.comet2, this.station];
     }
 }

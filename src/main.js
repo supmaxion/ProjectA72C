@@ -8,12 +8,15 @@ import { SolarSystem } from './entities/SolarSystem.js';
 import { MouseLook } from './controls/MouseLook.js';
 import { getOverlayElements } from './ui/overlay.js';
 import { spawnBackgroundObjects } from './entities/BackgroundObject.js';
-import { DUST_FIELD, GAME_START } from './config.js';
+import { DUST_FIELD, GAME_START, BACKGROUND_OBJECTS as CFG } from './config.js';
 import { Blink } from './ui/Blink.js';
 import { RippleOverlay } from './ui/RippleOverlay.js';
 import { Hud } from './ui/Hud.js';
 import { checkShipCollision } from './physics/CollisionSystem.js';
 import { DeathSequence } from './ui/DeathSequence.js';
+import { MilkyWayBandPoints } from './entities/MilkyWayBand.js';
+// import { MilkyWayBandPanorama } from './entities/MilkyWayBand.js'; // ← váltáshoz kommenteld ki ezt és a fentit
+import { NebulaFog } from './entities/NebulaFog.js';
 
 async function init() {
     // --- CORE ---
@@ -36,6 +39,11 @@ async function init() {
 
     const dustField = createDustField(DUST_FIELD);
     scene.add(dustField);
+
+    const milkyWay = new MilkyWayBandPoints(scene);
+    // const milkyWay = new MilkyWayBandPanorama(scene);
+
+    const fog = new NebulaFog(scene, CFG.skyDistance, '#1a1030');
 
     const solarSystem = new SolarSystem(scene);
     
@@ -86,11 +94,13 @@ async function init() {
         solarSystem.update(camera.position);
         updateCameraFollow(camera, ship);
 
-        //todo claude! Válaszolj erre a kérdésre: ezen miért kell framenként menni?
         backgroundObjects.forEach(obj => obj.update(delta, camera.position));
+        milkyWay.update(camera.position);
+        fog.update(camera.position);
 
         // Ütközésvizsgálat a hajó és a bolygók/holdak között
-        const hitBody = checkShipCollision(ship.position, [...solarSystem.getBodies(), sunCollider]);
+        const asteroidHit = solarSystem.asteroidBelt.checkCollision(ship.position);
+        const hitBody = asteroidHit || checkShipCollision(ship.position, [...solarSystem.getBodies(), sunCollider]);
         if (hitBody) {
             isGameOver = true;
             deathSequence.trigger();
@@ -108,10 +118,10 @@ async function init() {
         const rippleOverlay = new RippleOverlay();
         setTimeout(() => {
             rippleOverlay.ripple({ x: 70, y: 30, text: 'I should click' });
-        }, 6000);
+        }, 4500);
         setTimeout(() => {
             rippleOverlay.ripple({ x: 50, y: 30, text: 'I can use "esc"' });
-        }, 16000);
+        }, 12000);
     }
 
     console.log('🚀 Project-A72C started');

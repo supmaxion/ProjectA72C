@@ -2,7 +2,7 @@ import * as THREE from 'three';
 
 
 export const GAME_START = {
-    blink: true,
+    blink: false,
 };
 
 export const CELESTIAL = {
@@ -312,28 +312,76 @@ export const BACKGROUND_OBJECTS = {
     max: 20000,
   },
   counts: {
-    nebula:      6,
-    galaxy:      4,
-    starCluster: 5,
+    nebula:      3,
+    galaxy:      3,
+    starCluster: 3,
     pulsar:      3,
+    supernova: 3,
+    blackHole: 3,
   },
   nebula: {
     minSize: 800,
-    maxSize: 2500,
+    maxSize: 1000,
   },
   galaxy: {
     minSize: 600,
-    maxSize: 1800,
+    maxSize: 1000,
   },
   starCluster: {
     minSize: 400,
-    maxSize: 1200,
+    maxSize: 700,
   },
   pulsar: {
-    minSize: 80,
-    maxSize: 200,
+    minSize: 800,
+    maxSize: 1000,
     pulseSpeed: 4.0,  // rad/s
   },
+  supernova: {
+    minSize: 300,
+    maxSize: 450,
+  },
+  blackHole: {
+    minSize: 200,
+    maxSize: 300,
+  },
+};
+
+export const COMET = {
+    name: 'Comet',
+    radius: 15,
+    color: 0xcfe8ff,
+    tailColor: 0xaad4ff,
+    tailLength: 600,
+    tailWidth: 40,
+    orbit: {
+        semiMajorAxis: 9000,
+        eccentricity: 0.85,
+        inclination: THREE.MathUtils.degToRad(20),
+        speed: 0.0002,
+        phaseOffset: 0,
+    },
+};
+
+export const STATION = {
+    position: new THREE.Vector3(4000, 200, -6000),
+    ringRadius: 220,
+};
+
+export const MILKY_WAY = {
+    starCount: 8000,
+    starSize: 0.3,
+    bandThickness: 0.04,        // mennyire "vastag" a sáv (gauss szórás)
+    bandTilt: THREE.MathUtils.degToRad(5),
+    skyDistance: BACKGROUND_OBJECTS.skyDistance, // ugyanaz, mint a többi háttérobjektumnál
+};
+
+export const ASTEROID_BELT = {
+    innerRadius: 12000,
+    outerRadius: 14000,
+    count: 250,
+    minSize: 10,
+    maxSize: 60,
+    color: 0x8a7d6e,
 };
 
 export const ORBIT_TRAIL = {
