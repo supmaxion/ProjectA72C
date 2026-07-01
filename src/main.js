@@ -8,7 +8,7 @@ import { SolarSystem } from './entities/SolarSystem.js';
 import { MouseLook } from './controls/MouseLook.js';
 import { getOverlayElements } from './ui/overlay.js';
 import { spawnBackgroundObjects } from './entities/BackgroundObject.js';
-import { DUST_FIELD, GAME_START, BACKGROUND_OBJECTS as CFG, SHIP } from './config.js';
+import { DUST_FIELD, GAME_START, BACKGROUND_OBJECTS as CFG, SHIP, MOUSE_SENSITIVITY } from './config.js';
 import { Blink } from './ui/Blink.js';
 import { RippleOverlay } from './ui/RippleOverlay.js';
 import { Hud } from './ui/Hud.js';
@@ -18,7 +18,7 @@ import { MilkyWayBandPoints } from './entities/MilkyWayBand.js';
 // import { MilkyWayBandPanorama } from './entities/MilkyWayBand.js'; // ← váltáshoz kommenteld ki ezt és a fentit
 import { NebulaFog } from './entities/NebulaFog.js';
 import { MessageManager } from './ui/MessageManager.js';
-import { RestApi } from '../RestApi'
+import { RestApi } from './RestApi'
 
 async function init() {
     // --- CORE ---
@@ -57,7 +57,6 @@ async function init() {
 
     const backgroundObjects = spawnBackgroundObjects(scene);
 
-
     //pislogás és hullám animáció
     let messages = null;
     if (GAME_START.blink) {
@@ -65,9 +64,11 @@ async function init() {
         messages = new MessageManager();
         messages.start();
     }
+
     // --- CONTROLS ---
     const { clickToStart } = getOverlayElements();
     const mouseLook = new MouseLook({
+        sensitivity: MOUSE_SENSITIVITY.value,
         clickToStartEl: clickToStart,
         domElement: renderer.domElement,
             onAction: (action) => {
@@ -115,14 +116,7 @@ async function init() {
         const input = mouseLook.consume();
         input.roll = (keyState.rollLeft ? 1 : 0) - (keyState.rollRight ? 1 : 0);
 
-        // Mouse input korrekció a camera roll miatt
-        const cos = Math.cos(-cameraRollAngle);
-        const sin = Math.sin(-cameraRollAngle);
-        const correctedYaw   = input.yaw * cos - input.pitch * sin;
-        const correctedPitch = input.yaw * sin + input.pitch * cos;
-        input.yaw   = correctedYaw;
-        input.pitch = correctedPitch;
-
+        input.cameraRoll = cameraRollAngle;
 
         cameraRollAngle += input.roll * SHIP.rollSpeed;
         ship.update(input);

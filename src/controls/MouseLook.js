@@ -8,7 +8,7 @@
  * can change later without touching the ship's rotation logic at all.
  */
 export class MouseLook {
-    constructor({ sensitivity = 0.0022, clickToStartEl, domElement, onAction } = {}) {
+    constructor({ sensitivity, clickToStartEl, domElement, onAction } = {}) {
         this.sensitivity = sensitivity;
         this.isLocked = false;
         this._onAction = onAction || null;

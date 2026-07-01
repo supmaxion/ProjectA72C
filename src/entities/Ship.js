@@ -75,17 +75,34 @@ export class Ship {
     }
 
     update(input) {
-        const { yaw, pitch, scroll } = input;
+        const { yaw, pitch, scroll, cameraRoll = 0 } = input;
 
         if (scroll !== 0) {
             this.speed -= Math.sign(scroll) * this._scrollAcceleration;
         }
         this.speed = Math.max(this._minSpeed, Math.min(this._maxSpeed, this.speed));
 
-        const deltaQuat = new THREE.Quaternion().setFromEuler(
-            new THREE.Euler(pitch, yaw, 0, 'XYZ')
+        // Kamera valódi lokális tengelyei ship-lokális térben
+        const camPitchQuat = new THREE.Quaternion().setFromAxisAngle(
+            new THREE.Vector3(1, 0, 0), CAMERA.rotationX
         );
-        this.group.quaternion.multiply(deltaQuat);
+        const camRollQuat = new THREE.Quaternion().setFromAxisAngle(
+            new THREE.Vector3(0, 0, 1), cameraRoll
+        );
+        const camRel = new THREE.Quaternion().multiplyQuaternions(camPitchQuat, camRollQuat);
+
+        // Yaw: kamera lokális Y tengelye körül
+        const yawAxis = new THREE.Vector3(0, 1, 0).applyQuaternion(camRel);
+        // Pitch: kamera lokális X tengelye körül
+        const pitchAxis = new THREE.Vector3(1, 0, 0).applyQuaternion(camRel);
+
+        const yawQuat = new THREE.Quaternion().setFromAxisAngle(yawAxis, yaw);
+        const pitchQuat2 = new THREE.Quaternion().setFromAxisAngle(pitchAxis, pitch);
+
+        this.group.quaternion.multiply(yawQuat);
+        this.group.quaternion.multiply(pitchQuat2);
+
+
         this.group.quaternion.normalize();
 
         let targetRoll = yaw * 18;

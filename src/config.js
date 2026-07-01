@@ -9,6 +9,10 @@ export const CELESTIAL = {
     wireShellVisibleDistanceMultiplier: 100,
 };
 
+export const MOUSE_SENSITIVITY = {
+    value: 0.00022,
+};
+
 // export const SYSTEM_VISIBILITY = {
 //     systemVisibleDistance : 20000,
 // };
@@ -43,9 +47,9 @@ export const SHIP = {
     scrollAcceleration: 0.5,  // sebesség-változás görgőegységenként
     modelSize: 15, 
     modelRotationX: 0.15, 
-    rollSpeed: 0.025,       // roll szögsebesség A/D gombonként, radián/frame
-    driftFollow: 0.00001,      // mennyire "lassan" éri utol a drift a tényleges yaw-t (kisebb = lustább, nagyobb csúszás)
-    driftStrength: 0.000030,     // a csúszás mértéke (yaw-különbség szorzója)
+    rollSpeed: 0.012,       // roll szögsebesség A/D gombonként, radián/frame
+    // driftFollow: 1,      // mennyire "lassan" éri utol a drift a tényleges yaw-t (kisebb = lustább, nagyobb csúszás)
+    // driftStrength: 3,     // a csúszás mértéke (yaw-különbség szorzója)
 };
 
 export const CAMERA = {
