@@ -17,6 +17,7 @@ import { DeathSequence } from './ui/DeathSequence.js';
 import { MilkyWayBandPoints } from './entities/MilkyWayBand.js';
 // import { MilkyWayBandPanorama } from './entities/MilkyWayBand.js'; // ← váltáshoz kommenteld ki ezt és a fentit
 import { NebulaFog } from './entities/NebulaFog.js';
+import { MessageManager } from './ui/MessageManager.js';
 
 async function init() {
     // --- CORE ---
@@ -53,11 +54,22 @@ async function init() {
 
     const backgroundObjects = spawnBackgroundObjects(scene);
 
+
+    //pislogás és hullám animáció
+    let messages = null;
+    if (GAME_START.blink) {
+        const blink = new Blink({ delay: 500 });
+        messages = new MessageManager();
+        messages.start();
+    }
     // --- CONTROLS ---
     const { clickToStart } = getOverlayElements();
     const mouseLook = new MouseLook({
         clickToStartEl: clickToStart,
         domElement: renderer.domElement,
+            onAction: (action) => {
+        messages?.markDone(action);
+    },
     });
 
     // --- TOGGLE ORBIT LINES ---
@@ -74,6 +86,7 @@ async function init() {
         if (e.key === 'Tab') {
             e.preventDefault();
             hud.cycleActiveBox(e.shiftKey ? -1 : 1);
+            messages?.markDone('tabCycle');
         }
     });
 
@@ -104,7 +117,6 @@ async function init() {
         if (hitBody) {
             isGameOver = true;
             deathSequence.trigger();
-            console.log(`💥 Ütközés: ${hitBody.name}`);
         }
 
         renderer.render(scene, camera);
@@ -112,19 +124,7 @@ async function init() {
 
     animate();
 
-    //pislogás és hullám animáció
-    if (GAME_START.blink) {
-        const blink = new Blink({ delay: 500 });
-        const rippleOverlay = new RippleOverlay();
-        setTimeout(() => {
-            rippleOverlay.ripple({ x: 70, y: 30, text: 'I should click' });
-        }, 4500);
-        setTimeout(() => {
-            rippleOverlay.ripple({ x: 50, y: 30, text: 'I can use "esc"' });
-        }, 12000);
-    }
 
-    console.log('🚀 Project-A72C started');
 }
 
 init();

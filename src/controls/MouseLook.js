@@ -8,9 +8,10 @@
  * can change later without touching the ship's rotation logic at all.
  */
 export class MouseLook {
-    constructor({ sensitivity = 0.0022, clickToStartEl, domElement } = {}) {
+    constructor({ sensitivity = 0.0022, clickToStartEl, domElement, onAction } = {}) {
         this.sensitivity = sensitivity;
         this.isLocked = false;
+        this._onAction = onAction || null;
 
         // Accumulated since the last time the consumer called consume().
         this._yawInput = 0;
@@ -38,10 +39,15 @@ export class MouseLook {
 
     _onClickToStart() {
         this._domElement.requestPointerLock();
+        this._onAction?.('click');
     }
 
     _onPointerLockChange() {
+        const wasLocked = this.isLocked;
         this.isLocked = document.pointerLockElement === this._domElement;
+        if (wasLocked && !this.isLocked) {
+            this._onAction?.('esc');
+        }
     }
 
     _onMouseMove(event) {
@@ -58,6 +64,7 @@ export class MouseLook {
     _onWheel(event) {
         if (!this.isLocked) return;
         this._scrollDelta += event.deltaY;
+        this._onAction?.('wheel');
     }
 
     /**

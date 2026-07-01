@@ -7,7 +7,7 @@
  */
 export function getOverlayElements() {
     return {
-        info: document.getElementById('info'),
+        // info: document.getElementById('info'),
         hud: document.getElementById('hud'),
         clickToStart: document.body,
     };

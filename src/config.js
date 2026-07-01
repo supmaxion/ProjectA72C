@@ -2,12 +2,16 @@ import * as THREE from 'three';
 
 
 export const GAME_START = {
-    blink: false,
+    blink: true,
 };
 
 export const CELESTIAL = {
     wireShellVisibleDistanceMultiplier: 100,
 };
+
+// export const SYSTEM_VISIBILITY = {
+//     systemVisibleDistance : 20000,
+// };
 
 export const SUN = {
     direction: new THREE.Vector3(0,0,0),
@@ -32,7 +36,7 @@ export const DUST_FIELD = {
 };
 
 export const SHIP = {
-    startPosition: new THREE.Vector3(0, 3000, 50000),
+    startPosition: new THREE.Vector3(0, 3000, 70000),
     speed: 0.45,
     minSpeed: 0.0000001,
     maxSpeed: 9999,
