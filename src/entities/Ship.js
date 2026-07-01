@@ -36,8 +36,6 @@ export class Ship {
                 const model = gltf.scene;
                 model.rotation.y = Math.PI;
                 model.rotation.x = SHIP.modelRotationX;
-                // model.rotation.x = SHIP.modelRotationX + 0.33;
-                // model.position.set(0, 0, 0);
 
                 // Automatikus méretezés
                 const box = new THREE.Box3().setFromObject(model);

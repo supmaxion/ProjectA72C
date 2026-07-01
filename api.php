@@ -37,10 +37,10 @@ $sContent .= "<br> Város: " . $logArr['ipCity'];
 
 // print ($sContent);
 
-if ($action === 'WarpExit') {
+if ($action === 'Indul') {
 	// sendEmail( 'attila.zsolt.nagy@gmail.com', 'Warp Exit volt', 'üzenet', 'no-reply@labor.hu', "" );
 	// sendEmail( "info@bitdent.eu", $sSubject, $sContent, '<info@bitdent.eu>', 'info@bitdent.eu' );
-	sendEmail( "info@labor24.hu", 'Warp Exit volt', $sContent, '<info@labor24.hu>', 'info@labor24.hu' );
+	sendEmail( "info@labor24.hu", 'Indították', $sContent, '<info@labor24.hu>', 'info@labor24.hu' );
 	// mail('attila.zsolt.nagy@gmail.com', 'Test subject', 'Test body');
 	// mail( "info@labor24.hu", 'Warp Exit volt', 'üzenet' );
 }elseif ($action === 'Landing') {

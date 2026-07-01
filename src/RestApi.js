@@ -13,8 +13,8 @@ export function RestApi( phase ) {
 	let url
 
     switch (phase) {
-        case 'WarpExit':
-            url = "https://labor24.hu/space/api.php?action=WarpExit"
+        case 'Indul':
+            url = "https://labor24.hu/space/api.php?action=Indul"
             break
         case 'Landing':
             url = "https://labor24.hu/space/api.php?action=Landing"

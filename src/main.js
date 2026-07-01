@@ -18,6 +18,7 @@ import { MilkyWayBandPoints } from './entities/MilkyWayBand.js';
 // import { MilkyWayBandPanorama } from './entities/MilkyWayBand.js'; // ← váltáshoz kommenteld ki ezt és a fentit
 import { NebulaFog } from './entities/NebulaFog.js';
 import { MessageManager } from './ui/MessageManager.js';
+import { RestApi } from '../RestApi'
 
 async function init() {
     // --- CORE ---
@@ -154,6 +155,7 @@ async function init() {
 
     animate();
 
+    RestApi('Indul');
 
 }
 
