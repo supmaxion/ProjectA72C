@@ -1,4 +1,6 @@
 import * as THREE from 'three';
+import { SYSTEM_VISIBILITY } from '../config.js';
+
 
 export class AsteroidField {
     constructor({ center, innerRadius, outerRadius, count, minSize, maxSize, color }) {
@@ -41,7 +43,7 @@ export class AsteroidField {
         }
     }
 
-    update() {
+    update(shipPosition) {
         for (const a of this.asteroids) {
             a.angle += a.orbitSpeed;
             a.mesh.position.set(
@@ -51,6 +53,12 @@ export class AsteroidField {
             );
             a.mesh.rotation.x += a.spinSpeed;
             a.mesh.rotation.y += a.spinSpeed * 0.7;
+
+            if (shipPosition) {
+                const dist = a.mesh.position.distanceTo(shipPosition);
+                a.mesh.visible = dist < SYSTEM_VISIBILITY.systemRevealDistance;
+            }
+
         }
     }
 

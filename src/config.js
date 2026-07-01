@@ -13,9 +13,9 @@ export const MOUSE_SENSITIVITY = {
     value: 0.00022,
 };
 
-// export const SYSTEM_VISIBILITY = {
-//     systemVisibleDistance : 20000,
-// };
+export const SYSTEM_VISIBILITY = {
+    systemRevealDistance: 27000,
+};
 
 export const SUN = {
     direction: new THREE.Vector3(0,0,0),
@@ -40,7 +40,7 @@ export const DUST_FIELD = {
 };
 
 export const SHIP = {
-    startPosition: new THREE.Vector3(0, 3000, 7000),//0,3000,700000
+    startPosition: new THREE.Vector3(0, 3000, 53000),//0,3000,70000
     speed: 0.45,
     minSpeed: 0.0000001,
     maxSpeed: 9999,
@@ -58,6 +58,95 @@ export const CAMERA = {
     far: 1000000,
     offsetLocal: new THREE.Vector3(0, 0, 30),//0,5,18
     rotationX: THREE.MathUtils.degToRad(0),
+};
+
+export const COMET = {
+    name: 'Comet',
+    radius: 15,
+    color: 0xcfe8ff,
+    tailColor: 0xaad4ff,
+    tailLength: 600,
+    tailWidth: 40,
+    orbit: {
+        semiMajorAxis: 9000,
+        eccentricity: 0.85,
+        inclination: THREE.MathUtils.degToRad(20),
+        speed: 0.0002,
+        phaseOffset: 0,
+    },
+};
+
+export const STATION = {
+    position: new THREE.Vector3(4000, 200, -6000),
+    ringRadius: 220,
+};
+
+export const ASTEROID_BELT = {
+    innerRadius: 25000,
+    outerRadius: 30000,
+    count: 500,
+    minSize: 10,
+    maxSize: 60,
+    color: 0x8a7d6e,
+};
+
+export const ORBIT_TRAIL = {
+    ellipsePoints:    180,     // statikus ellipszis pontjainak száma
+    ellipseOpacity:   0.18,    // halvány
+    trailDuration:    10.0,     // másodperc
+    trailMaxPoints:   300,     // max tárolt pont
+    trailMaxOpacity:  1.5,     // trail legfényesebb pontja
+    minDistance:      5,       // minimum elmozdulás új pont felvételéhez
+    offsetLocal: new THREE.Vector3(0, 5, 18),
+};
+
+export const BACKGROUND_OBJECTS = {
+    skyDistance: 9000, // kamerától való távolság — a far plane alatt kell legyen
+  spawnRadius: {
+    min: 8000,   // ne legyen túl közel az origóhoz
+    max: 20000,
+  },
+  counts: {
+    nebula:      3,
+    galaxy:      3,
+    starCluster: 3,
+    pulsar:      3,
+    supernova: 3,
+    blackHole: 3,
+  },
+  nebula: {
+    minSize: 800,
+    maxSize: 1000,
+  },
+  galaxy: {
+    minSize: 600,
+    maxSize: 1000,
+  },
+  starCluster: {
+    minSize: 400,
+    maxSize: 700,
+  },
+  pulsar: {
+    minSize: 800,
+    maxSize: 1000,
+    pulseSpeed: 4.0,  // rad/s
+  },
+  supernova: {
+    minSize: 300,
+    maxSize: 450,
+  },
+  blackHole: {
+    minSize: 200,
+    maxSize: 300,
+  },
+};
+
+export const MILKY_WAY = {
+    starCount: 8000,
+    starSize: 0.3,
+    bandThickness: 0.04,        // mennyire "vastag" a sáv (gauss szórás)
+    bandTilt: THREE.MathUtils.degToRad(5),
+    skyDistance: BACKGROUND_OBJECTS.skyDistance, // ugyanaz, mint a többi háttérobjektumnál
 };
 
 export const SOLAR_SYSTEM = {
@@ -314,93 +403,4 @@ export const SOLAR_SYSTEM = {
             ],
         },
     ],
-};
-
-export const BACKGROUND_OBJECTS = {
-    skyDistance: 9000, // kamerától való távolság — a far plane alatt kell legyen
-  spawnRadius: {
-    min: 8000,   // ne legyen túl közel az origóhoz
-    max: 20000,
-  },
-  counts: {
-    nebula:      3,
-    galaxy:      3,
-    starCluster: 3,
-    pulsar:      3,
-    supernova: 3,
-    blackHole: 3,
-  },
-  nebula: {
-    minSize: 800,
-    maxSize: 1000,
-  },
-  galaxy: {
-    minSize: 600,
-    maxSize: 1000,
-  },
-  starCluster: {
-    minSize: 400,
-    maxSize: 700,
-  },
-  pulsar: {
-    minSize: 800,
-    maxSize: 1000,
-    pulseSpeed: 4.0,  // rad/s
-  },
-  supernova: {
-    minSize: 300,
-    maxSize: 450,
-  },
-  blackHole: {
-    minSize: 200,
-    maxSize: 300,
-  },
-};
-
-export const COMET = {
-    name: 'Comet',
-    radius: 15,
-    color: 0xcfe8ff,
-    tailColor: 0xaad4ff,
-    tailLength: 600,
-    tailWidth: 40,
-    orbit: {
-        semiMajorAxis: 9000,
-        eccentricity: 0.85,
-        inclination: THREE.MathUtils.degToRad(20),
-        speed: 0.0002,
-        phaseOffset: 0,
-    },
-};
-
-export const STATION = {
-    position: new THREE.Vector3(4000, 200, -6000),
-    ringRadius: 220,
-};
-
-export const MILKY_WAY = {
-    starCount: 8000,
-    starSize: 0.3,
-    bandThickness: 0.04,        // mennyire "vastag" a sáv (gauss szórás)
-    bandTilt: THREE.MathUtils.degToRad(5),
-    skyDistance: BACKGROUND_OBJECTS.skyDistance, // ugyanaz, mint a többi háttérobjektumnál
-};
-
-export const ASTEROID_BELT = {
-    innerRadius: 25000,
-    outerRadius: 30000,
-    count: 500,
-    minSize: 10,
-    maxSize: 60,
-    color: 0x8a7d6e,
-};
-
-export const ORBIT_TRAIL = {
-    ellipsePoints:    180,     // statikus ellipszis pontjainak száma
-    ellipseOpacity:   0.18,    // halvány
-    trailDuration:    10.0,     // másodperc
-    trailMaxPoints:   300,     // max tárolt pont
-    trailMaxOpacity:  1.5,     // trail legfényesebb pontja
-    minDistance:      5,       // minimum elmozdulás új pont felvételéhez
-    offsetLocal: new THREE.Vector3(0, 5, 18),
 };

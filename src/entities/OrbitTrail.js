@@ -139,4 +139,12 @@ export class DynamicTrail {
         this._material.dispose();
         this.scene.remove(this._line);
     }
+
+    get visible() {
+        return this._line.visible;
+    }
+
+    set visible(value) {
+        this._line.visible = value;
+    }
 }

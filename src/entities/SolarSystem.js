@@ -4,7 +4,7 @@ import { createOrbitLine, DynamicTrail } from './OrbitTrail.js';
 import { Comet, COMET_2 } from './Comet.js';
 import { AsteroidField } from './AsteroidField.js';
 import { SpaceStation } from './SpaceStation.js';
-import { SOLAR_SYSTEM, COMET, ASTEROID_BELT, STATION } from '../config.js';
+import { SOLAR_SYSTEM, COMET, ASTEROID_BELT, STATION, SYSTEM_VISIBILITY } from '../config.js';
 
 export class SolarSystem {
     constructor(scene) {
@@ -12,7 +12,9 @@ export class SolarSystem {
         this._planets  = [];
         this._time     = 0;
         this._trails   = [];
+        this._trailsVisible = true;
         this._orbitLines = [];
+        this._orbitLinesVisible = true;
 
         const sunPos = new THREE.Vector3(
             SOLAR_SYSTEM.sun.position.x,
@@ -87,25 +89,54 @@ export class SolarSystem {
         this._time++;
         const now = performance.now() / 1000;
 
-        for (const planet of this._planets) {
+        for (let i = 0; i < this._planets.length; i++) {
+            const planet = this._planets[i];
             planet.update(this._time, cameraPosition);
+
+            if (this._orbitLines[i] && this._orbitLinesVisible) {
+                const dist = planet.position.distanceTo(cameraPosition);
+                this._orbitLines[i].visible = dist < SYSTEM_VISIBILITY.systemRevealDistance;
+            }
         }
 
-        this.comet.update(this._time);
-        this.comet2.update(this._time);
-        this.asteroidBelt.update();
-        this.station.update();
         for (const { trail, body } of this._trails) {
             trail.update(body.position, now);
+
+            if (this._trailsVisible) {
+                const dist = body.position.distanceTo(cameraPosition);
+                trail.visible = dist < SYSTEM_VISIBILITY.systemRevealDistance;
+            }
         }
+
+        this.comet?.update(this._time);
+        this.comet2?.update(this._time);
+
+        this.asteroidBelt.update(cameraPosition);
+        this.station.update(cameraPosition);
     }
 
+
     setOrbitLinesVisible(visible) {
-        for (const line of this._orbitLines) {
-            line.visible = visible;
+        this._orbitLinesVisible = visible;
+        if (!visible) {
+            for (const line of this._orbitLines) {
+                line.visible = false;
+            }
         }
-        this.comet.setOrbitLineVisible(visible);
-        this.comet2.setOrbitLineVisible(visible);
+
+        // ha visible=true, az update() majd a távolság alapján dönt soronként
+        this.comet?.setOrbitLineVisible(visible);
+        this.comet2?.setOrbitLineVisible(visible);
+    }
+
+    setTrailLinesVisible(visible) {
+        this._trailsVisible = visible;
+        if (!visible) {
+            for (const { trail } of this._trails) {
+                trail.visible = false;
+            }
+        }
+        // ha visible=true, az update() majd a távolság alapján dönt soronként
     }
 
     getBodies() {

@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { SYSTEM_VISIBILITY } from '../config.js';
 
 export class SpaceStation {
     constructor(position, { ringRadius = 200, ringThickness = 12, color = 0x66ccff } = {}) {
@@ -26,8 +27,20 @@ export class SpaceStation {
         this.radius = ringRadius + ringThickness;
     }
 
-    update() {
+    update(cameraPosition) {
         this.ring.rotation.z += 0.0015;
+
+        if (cameraPosition) {
+            const dist = this.position.distanceTo(cameraPosition);
+            this.visible = dist < SYSTEM_VISIBILITY.systemRevealDistance;
+        }
     }
 
+    get visible() {
+        return this.group.visible;
+    }
+
+    set visible(value) {
+        this.group.visible = value;
+    }
 }

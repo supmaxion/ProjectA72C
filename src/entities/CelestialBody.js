@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { keplerPosition } from '../physics/OrbitalMechanics.js';
-import { CELESTIAL } from '../config.js';
+import { CELESTIAL, SYSTEM_VISIBILITY } from '../config.js';
 
 export class CelestialBody {
     constructor({
@@ -53,9 +53,14 @@ export class CelestialBody {
 
         this.group.position.copy(this.position);
 
-        if (cameraPosition && this.wireShells) {
+        if (cameraPosition) {
             const dist = this.position.distanceTo(cameraPosition);
-            this.wireShells.visible = dist < this.shellVisibleDistance;
+
+            this.group.visible = dist < SYSTEM_VISIBILITY.systemRevealDistance;
+
+            if (this.wireShells) {
+                this.wireShells.visible = this.group.visible && dist < this.shellVisibleDistance;
+            }
         }
 
         for (const moon of this.moons) {
