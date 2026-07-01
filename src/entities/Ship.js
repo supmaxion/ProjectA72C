@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { SHIP } from '../config.js';
+import { SHIP, CAMERA } from '../config.js';
 
 const modelPath = import.meta.env.BASE_URL + 'models/ship.glb';
 
@@ -23,7 +23,8 @@ export class Ship {
         this._maxSpeed = SHIP.maxSpeed;
         this._scrollAcceleration = SHIP.scrollAcceleration;
         this._currentRoll = 0;
-
+        this.counterRoll = 0;
+        // this.visualGroup.quaternion.identity();
         this._loadModel();
     }
 
@@ -35,7 +36,8 @@ export class Ship {
                 const model = gltf.scene;
                 model.rotation.y = Math.PI;
                 model.rotation.x = SHIP.modelRotationX;
-                model.position.set(0, 0, 0);
+                // model.rotation.x = SHIP.modelRotationX + 0.33;
+                // model.position.set(0, 0, 0);
 
                 // Automatikus méretezés
                 const box = new THREE.Box3().setFromObject(model);
@@ -44,7 +46,6 @@ export class Ship {
                 model.scale.setScalar(scale);
 
                 this.visualGroup.add(model);
-                console.log(`GLB modell betöltve! Méret: ${size.toFixed(2)}, skála: ${scale.toFixed(4)}`);
             },
             (xhr) => {
                 if (xhr.total > 0) {
@@ -92,7 +93,27 @@ export class Ship {
         let targetRoll = yaw * 18;
         targetRoll = Math.max(-0.6, Math.min(0.6, targetRoll));
         this._currentRoll += (targetRoll - this._currentRoll) * 0.12;
-        this.visualGroup.rotation.set(0, 0, this._currentRoll * 0.6);
+        
+
+        
+        const pitchQuat = new THREE.Quaternion().setFromAxisAngle(
+            new THREE.Vector3(1, 0, 0),
+            CAMERA.rotationX
+        );
+        const rollQuat = new THREE.Quaternion().setFromAxisAngle(
+            new THREE.Vector3(0, 0, 1),
+            this.counterRoll
+        );
+        const bankQuat = new THREE.Quaternion().setFromAxisAngle(
+            new THREE.Vector3(0, 0, 1),
+            this._currentRoll * 0.6
+        );
+        const pq = new THREE.Quaternion().multiplyQuaternions(pitchQuat, rollQuat);
+        this.visualGroup.quaternion.multiplyQuaternions(pq, bankQuat);
+
+
+
+
 
         const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(this.group.quaternion);
         this.group.position.addScaledVector(forward, this.speed);

@@ -1,5 +1,5 @@
 import { createScene } from './core/scene.js';
-import { createCamera, updateCameraFollow } from './core/camera.js';
+import { createCamera, updateCameraFollow, getCameraRollQuat } from './core/camera.js';
 import { createRenderer, clock } from './core/renderer.js';
 import { Ship } from './entities/Ship.js';
 import { createSun } from './entities/Sun.js';
@@ -8,7 +8,7 @@ import { SolarSystem } from './entities/SolarSystem.js';
 import { MouseLook } from './controls/MouseLook.js';
 import { getOverlayElements } from './ui/overlay.js';
 import { spawnBackgroundObjects } from './entities/BackgroundObject.js';
-import { DUST_FIELD, GAME_START, BACKGROUND_OBJECTS as CFG } from './config.js';
+import { DUST_FIELD, GAME_START, BACKGROUND_OBJECTS as CFG, SHIP } from './config.js';
 import { Blink } from './ui/Blink.js';
 import { RippleOverlay } from './ui/RippleOverlay.js';
 import { Hud } from './ui/Hud.js';
@@ -26,6 +26,8 @@ async function init() {
     const renderer = createRenderer(camera);
     const hud = new Hud();
 // hud.updateBox('tl-1', { label: 'SPEED', value: '0.4' });
+
+    let cameraRollAngle = 0;
 
     // --- ENTITIES ---
     const ship = new Ship();
@@ -72,6 +74,9 @@ async function init() {
     },
     });
 
+    //rolling state for ship rotation
+    const keyState = { rollLeft: false, rollRight: false };
+
     // --- TOGGLE ORBIT LINES ---
     let orbitLinesVisible = false;
     solarSystem.setOrbitLinesVisible(orbitLinesVisible);
@@ -80,14 +85,19 @@ async function init() {
             orbitLinesVisible = !orbitLinesVisible;
             solarSystem.setOrbitLinesVisible(orbitLinesVisible);
         }
-    });
+        if (e.key === 'a' || e.key === 'A') keyState.rollLeft = true;
+        if (e.key === 'd' || e.key === 'D') keyState.rollRight = true;
 
-    window.addEventListener('keydown', (e) => {
         if (e.key === 'Tab') {
             e.preventDefault();
             hud.cycleActiveBox(e.shiftKey ? -1 : 1);
             messages?.markDone('tabCycle');
         }
+    });
+
+    window.addEventListener('keyup', (e) => {
+        if (e.key === 'a' || e.key === 'A') keyState.rollLeft = false;
+        if (e.key === 'd' || e.key === 'D') keyState.rollRight = false;
     });
 
     // --- GAME LOOP ---
@@ -102,10 +112,30 @@ async function init() {
         }
 
         const input = mouseLook.consume();
+        input.roll = (keyState.rollLeft ? 1 : 0) - (keyState.rollRight ? 1 : 0);
 
+        // Mouse input korrekció a camera roll miatt
+        const cos = Math.cos(-cameraRollAngle);
+        const sin = Math.sin(-cameraRollAngle);
+        const correctedYaw   = input.yaw * cos - input.pitch * sin;
+        const correctedPitch = input.yaw * sin + input.pitch * cos;
+        input.yaw   = correctedYaw;
+        input.pitch = correctedPitch;
+
+
+        cameraRollAngle += input.roll * SHIP.rollSpeed;
         ship.update(input);
         solarSystem.update(camera.position);
         updateCameraFollow(camera, ship);
+
+        // Roll utólag, a végső camera quaternion-ra
+        cameraRollAngle += input.roll * SHIP.rollSpeed;
+        const rollQuat = getCameraRollQuat(cameraRollAngle);
+        camera.quaternion.multiply(rollQuat);
+
+        // Counter: ship visualGroup-ban pontosan az inverze
+        ship.counterRoll = +cameraRollAngle;
+        
 
         backgroundObjects.forEach(obj => obj.update(delta, camera.position));
         milkyWay.update(camera.position);

@@ -2,7 +2,7 @@ import * as THREE from 'three';
 
 
 export const GAME_START = {
-    blink: true,
+    blink: false, // true: a játék indításakor villogjon a képernyő, false: azonnal induljon
 };
 
 export const CELESTIAL = {
@@ -36,21 +36,24 @@ export const DUST_FIELD = {
 };
 
 export const SHIP = {
-    startPosition: new THREE.Vector3(0, 3000, 70000),
+    startPosition: new THREE.Vector3(0, 3000, 7000),//0,3000,700000
     speed: 0.45,
     minSpeed: 0.0000001,
     maxSpeed: 9999,
     scrollAcceleration: 0.5,  // sebesség-változás görgőegységenként
     modelSize: 15, 
-    modelRotationX: -0.2, 
+    modelRotationX: 0.15, 
+    rollSpeed: 0.025,       // roll szögsebesség A/D gombonként, radián/frame
+    driftFollow: 0.00001,      // mennyire "lassan" éri utol a drift a tényleges yaw-t (kisebb = lustább, nagyobb csúszás)
+    driftStrength: 0.000030,     // a csúszás mértéke (yaw-különbség szorzója)
 };
 
 export const CAMERA = {
     fov: 60,
     near: 1,
     far: 1000000,
-    offsetLocal: new THREE.Vector3(0, 11, 30),//0,5,18
-    rotationX: THREE.MathUtils.degToRad(-20),
+    offsetLocal: new THREE.Vector3(0, 0, 30),//0,5,18
+    rotationX: THREE.MathUtils.degToRad(0),
 };
 
 export const SOLAR_SYSTEM = {

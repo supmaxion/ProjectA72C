@@ -38,7 +38,7 @@ const CAMERA_OFFSET_LOCAL = CAMERA.offsetLocal;
  * look the same direction the ship is facing, its orientation is
  * simply a copy of the ship's quaternion -- no extra rotation needed.
  */
-export function updateCameraFollow(camera, ship) {
+export function updateCameraFollow(camera, ship ) {
     const offsetWorld = CAMERA_OFFSET_LOCAL.clone().applyQuaternion(ship.quaternion);
 
     camera.position.copy(ship.position).add(offsetWorld);
@@ -51,4 +51,11 @@ export function updateCameraFollow(camera, ship) {
     );
 
     camera.quaternion.multiply(pitchQuat);
+}
+
+export function getCameraRollQuat(cameraRoll) {
+    return new THREE.Quaternion().setFromAxisAngle(
+        new THREE.Vector3(0, 0, 1),
+        cameraRoll
+    );
 }
