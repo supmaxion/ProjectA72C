@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import { createScene } from './core/scene.js';
 import { createCamera, updateCameraFollow, getCameraRollQuat } from './core/camera.js';
 import { createRenderer, clock } from './core/renderer.js';
@@ -32,6 +33,7 @@ async function init() {
 	
 
     let cameraRollAngle = 0;
+    let jumpCooldown = 0;
 
     // --- ENTITIES ---
     const ship = new Ship();
@@ -170,23 +172,30 @@ async function init() {
 
         // Ütközésvizsgálat a hajó és a bolygók/holdak között
         const asteroidHit = systemManager.current.asteroidBelt.checkCollision(ship.position);
-        const hitBody = asteroidHit || checkShipCollision(ship.position, [...systemManager.current.getBodies(), sunCollider]);
+        const hitBody = asteroidHit || checkShipCollision(ship.position, [...systemManager.current.getCollidableBodies(), sunCollider]);
         if (hitBody) {
             isGameOver = true;
             deathSequence.trigger();
         }
 
 		// Station megközelítése
+		if (jumpCooldown > 0) {
+			jumpCooldown -= delta; 
+		}
+
         const station = systemManager.current.station;
 		const distToStation = ship.position.distanceTo(station.position);
 
-		if (distToStation < station.radius * 1.5 && keys['e']) {
+		if (jumpCooldown <= 0 && distToStation < station.radius * 1.5) {
 			const nextSeed = station.destinationSeed;
 			systemManager.jumpTo(nextSeed);
 
 			// hajó pozicionálása az új rendszer station-je mellé
 			const newStation = systemManager.current.station;
 			ship.position.copy(newStation.position).add(new THREE.Vector3(0, 0, newStation.radius * 3));
+			
+			jumpCooldown = 3; // másodperc
+
 		}
 
 

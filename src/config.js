@@ -15,6 +15,7 @@ export const MOUSE_SENSITIVITY = {
 
 export const SYSTEM_VISIBILITY = {
     systemRevealDistance: 27000,
+    stationRevealDsitance: 4000,
 };
 
 export const SUN = {

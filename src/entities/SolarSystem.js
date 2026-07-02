@@ -156,4 +156,8 @@ export class SolarSystem {
     getBodies() {
         return [...this._planets, this.comet, this.comet2, this.station];
     }
+    
+    getCollidableBodies() {
+		return [...this._planets, this.comet, this.comet2];
+	}
 }

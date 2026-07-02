@@ -32,7 +32,7 @@ export class SpaceStation {
 
         if (cameraPosition) {
             const dist = this.position.distanceTo(cameraPosition);
-            this.visible = dist < SYSTEM_VISIBILITY.systemRevealDistance;
+            this.visible = dist < SYSTEM_VISIBILITY.stationRevealDsitance;
         }
     }
 
