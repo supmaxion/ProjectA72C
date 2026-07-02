@@ -9,6 +9,7 @@ export class CelestialBody {
         color,
         orbit,
         orbitCenter,
+        isMoon = false,
     }) {
         this.name = name;
         this.orbit = orbit;
@@ -37,11 +38,13 @@ export class CelestialBody {
         });
         this.group.add(new THREE.Mesh(glowGeo, glowMat));
 
-        this.wireShells = this.createWireShells(radius, 4);
-        this.group.add(this.wireShells);
+		if (!isMoon) {
+			this.wireShells = this.createWireShells(radius, 4);
+			this.group.add(this.wireShells);
 
-        // A shell-ek csak ennyi távolságon belül legyenek láthatóak (kamerától mérve)
-        this.shellVisibleDistance = CELESTIAL.wireShellVisibleDistanceMultiplier * radius;
+			// A shell-ek csak ennyi távolságon belül legyenek láthatóak (kamerától mérve)
+			this.shellVisibleDistance = CELESTIAL.wireShellVisibleDistanceMultiplier * radius;
+		}
 
         this._phaseOffset = orbit.phaseOffset ?? (Math.random() * Math.PI * 2 / orbit.speed);
 

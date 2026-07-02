@@ -22,6 +22,8 @@ export class Ship {
         this._minSpeed = SHIP.minSpeed;
         this._maxSpeed = SHIP.maxSpeed;
         this._scrollAcceleration = SHIP.scrollAcceleration;
+        this._thrustState = 'IDLE';
+		this._thrustHoldTime = 0;
         this._currentRoll = 0;
         this.counterRoll = 0;
         // this.visualGroup.quaternion.identity();
@@ -115,6 +117,13 @@ export class Ship {
     get quaternion() {
         return this.group.quaternion;
     }
+    
+    get heading() {
+		const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(this.group.quaternion);
+		let heading = Math.atan2(forward.x, -forward.z) * (180 / Math.PI);
+		if (heading < 0) heading += 360;
+		return heading;
+	}
 
     toggle() {
         if (!this.visualGroup) return;
@@ -127,7 +136,11 @@ export class Ship {
 
         if (scroll !== 0) {
             this.speed -= Math.sign(scroll) * this._scrollAcceleration;
-        }
+            this._thrustState = scroll < 0 ? 'ACCEL' : 'DECEL';
+            this._thrustHoldTime = performance.now();
+        } else if (performance.now() - this._thrustHoldTime > 1000) {
+			this._thrustState = 'IDLE';
+		}
         this.speed = Math.max(this._minSpeed, Math.min(this._maxSpeed, this.speed));
 
         // Kamera valódi lokális tengelyei ship-lokális térben

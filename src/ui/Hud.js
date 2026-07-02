@@ -305,7 +305,7 @@ export class Hud {
             'tl-1': 'SHIELD', 'tl-2': 'HULL', 'tl-3': 'POWER',
             'tc-1': 'TARGET', 'tc-2': 'DIST',  'tc-3': 'BEARING',
             'tr-1': 'RADAR',  'tr-2': 'COMM',  'tr-3': 'NAV',
-            'bl-1': 'FUEL',   'bl-2': 'TEMP',  'bl-3': 'THRUST',
+            'bl-1': 'FUEL',   'bl-2': 'TEMP',  'bl-3': 'THROTTLE',
             'bc-1': 'SPEED',  'bc-2': 'ALT',   'bc-3': 'HEADING',
             'br-1': 'CARGO',  'br-2': 'CREW',  'br-3': 'SYS',
         };

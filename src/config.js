@@ -27,11 +27,11 @@ export const SUN = {
     ambientIntensity: 1.5,
 };
 
-export const PLANET = {
-    position: new THREE.Vector3(5, 0, -1100),
-    radius: 200,
-    color: 0x44dd88,
-};
+//~ export const PLANET = {
+    //~ position: new THREE.Vector3(5, 0, -1100),
+    //~ radius: 200,
+    //~ color: 0x44dd88,
+//~ };
 
 export const DUST_FIELD = {
     count: 3000,
@@ -42,8 +42,8 @@ export const DUST_FIELD = {
 export const SHIP = {
     startPosition: new THREE.Vector3(0, 3000, 53000),//0,3000,70000
     speed: 0.45,
-    minSpeed: 0.0000001,
-    maxSpeed: 9999,
+    minSpeed: 0.01,
+    maxSpeed: 300,
     scrollAcceleration: 0.5,  // sebesség-változás görgőegységenként
     modelSize: 15, 
     modelRotationX: 0.15, 

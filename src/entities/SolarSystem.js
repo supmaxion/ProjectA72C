@@ -69,6 +69,7 @@ export class SolarSystem {
                         color:       moonConfig.color,
                         orbit:       moonConfig.orbit,
                         orbitCenter: planet.position,
+                        isMoon: true,
                     });
 
                     scene.add(moon.group);

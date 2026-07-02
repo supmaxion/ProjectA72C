@@ -104,6 +104,21 @@ async function init() {
         if (e.key === 'a' || e.key === 'A') keyState.rollLeft = false;
         if (e.key === 'd' || e.key === 'D') keyState.rollRight = false;
     });
+    
+    function getNearestPlanetAltitude(shipPosition, solarSystem) {
+		let nearest = null;
+		let minAlt = Infinity;
+
+		for (const body of solarSystem.getBodies()) {
+			const alt = shipPosition.distanceTo(body.position) - body.radius;
+			if (alt < minAlt) {
+				minAlt = alt;
+				nearest = body;
+			}
+		}
+		return nearest ? { name: nearest.name, altitude: minAlt } : null;
+	}
+
 
     // --- GAME LOOP ---
     function animate() {
@@ -126,6 +141,18 @@ async function init() {
         solarSystem.update(camera.position);
         updateCameraFollow(camera, ship);
 
+		// HUD boxok frissítése
+		const throttle = ((ship.speed - SHIP.minSpeed) / (SHIP.maxSpeed - SHIP.minSpeed)) * 100;
+		hud.updateBox('bl-3', { value: `${throttle.toFixed(0)}% ${ship._thrustState}` });
+		hud.updateBox('bc-1', { value: ship.speed.toFixed(2) });
+		hud.updateBox('bc-3', { value: `${ship.heading.toFixed(0)}°` });
+		const nearestPlanet = getNearestPlanetAltitude(ship.position, solarSystem);
+		if (nearestPlanet) {
+			hud.updateBox('bc-2', { value: formatAltitude(nearestPlanet.altitude) });
+		}
+		const stationDist = ship.position.distanceTo(solarSystem.station.position) - solarSystem.station.radius;
+		hud.updateBox('tc-2', { value: formatDistance(stationDist) });
+		
         // Roll utólag, a végső camera quaternion-ra
         // cameraRollAngle += input.roll * SHIP.rollSpeed; // ez törölve lett
         const rollQuat = getCameraRollQuat(cameraRollAngle);
@@ -152,6 +179,18 @@ async function init() {
 
     animate();
 
+	function formatAltitude(alt) {
+		if (alt < 0) return 'CONTACT';
+		if (alt < 1000) return alt.toFixed(0);
+		return `${(alt / 1000).toFixed(1)}k`;
+	}
+	
+	function formatDistance(dist) {
+		if (dist < 0) return 'CONTACT';
+		if (dist < 1000) return dist.toFixed(0);
+		return `${(dist / 1000).toFixed(1)}k`;
+	}
+	
     RestApi('Indul');
 
 }
