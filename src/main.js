@@ -18,7 +18,7 @@ import { MilkyWayBandPoints } from './entities/MilkyWayBand.js';
 // import { MilkyWayBandPanorama } from './entities/MilkyWayBand.js'; // ← váltáshoz kommenteld ki ezt és a fentit
 import { NebulaFog } from './entities/NebulaFog.js';
 import { MessageManager } from './ui/MessageManager.js';
-import { RestApi } from './RestApi'
+import { RestApi } from './RestApi';
 
 async function init() {
     // --- CORE ---
@@ -95,6 +95,9 @@ async function init() {
             hud.cycleActiveBox(e.shiftKey ? -1 : 1);
             messages?.markDone('tabCycle');
         }
+        if (e.key === 'Enter') {
+            ship.toggle();
+        }
     });
 
     window.addEventListener('keyup', (e) => {
@@ -124,7 +127,7 @@ async function init() {
         updateCameraFollow(camera, ship);
 
         // Roll utólag, a végső camera quaternion-ra
-        cameraRollAngle += input.roll * SHIP.rollSpeed;
+        // cameraRollAngle += input.roll * SHIP.rollSpeed; // ez törölve lett
         const rollQuat = getCameraRollQuat(cameraRollAngle);
         camera.quaternion.multiply(rollQuat);
 

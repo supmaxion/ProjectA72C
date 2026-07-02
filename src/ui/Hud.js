@@ -130,6 +130,10 @@ export class Hud {
         innerEdge.setAttribute('filter', 'url(#hudGlow)');
         this._svg.appendChild(innerEdge);
 
+        // referencia a nagy játékablakhoz (hologram stb. ehhez pozicionálható)
+        this._gameWindowEl = innerEdge;
+        this._gameWindowMetrics = { W, H, T, S, CI };
+
         // ─── BOXOK ────────────────────────────────────────────────────────
         this._boxes = {};
         this._buildTopRow(W, T, S, CI);
@@ -325,6 +329,31 @@ export class Hud {
         if (!box) return;
         if (label !== undefined) box.lbl.textContent = label;
         if (value !== undefined) box.val.textContent = value;
+    }
+
+/**
+     * A nagy középső "játékablak" (oktogon) képernyő-koordinátáit adja vissza
+     * (a bounding boxát), hogy külső DOM elemet (pl. hologram canvas) rá lehessen
+     * pozicionálni.
+     */
+    getGameWindowRect() {
+        if (!this._gameWindowEl) return null;
+        return this._gameWindowEl.getBoundingClientRect();
+    }
+
+    /**
+     * CSS clip-path polygon string, ami a nagy ablak oktogon alakjához igazítja
+     * a rá pozicionált külső elemet (pl. hologram), hogy ne lógjon ki a sarkokon.
+     */
+    getGameWindowClipPath() {
+        const m = this._gameWindowMetrics;
+        if (!m) return null;
+        const { W, H, T, S, CI } = m;
+        const width = W - 2 * S;
+        const height = H - 2 * T;
+        const cx = (CI / width) * 100;
+        const cy = (CI / height) * 100;
+        return `polygon(${cx}% 0%, ${100 - cx}% 0%, 100% ${cy}%, 100% ${100 - cy}%, ${100 - cx}% 100%, ${cx}% 100%, 0% ${100 - cy}%, 0% ${cy}%)`;
     }
 
     // ─── AKTÍV BOX / TAB NAVIGÁCIÓ ──────────────────────────────────────
