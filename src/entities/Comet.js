@@ -66,19 +66,3 @@ export class Comet {
     
 }
 
-
-export const COMET_2 = {
-    name: 'Comet-Retro',
-    radius: 10,
-    color: 0xffd9aa,
-    tailColor: 0xffcc88,
-    tailLength: 450,
-    tailWidth: 30,
-    orbit: {
-        semiMajorAxis: 13000,
-        eccentricity: 0.78,
-        inclination: THREE.MathUtils.degToRad(-35),
-        speed: -0.0014, // negatív = retrográd
-        phaseOffset: Math.PI,
-    },
-};

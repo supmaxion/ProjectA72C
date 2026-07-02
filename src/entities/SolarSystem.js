@@ -1,14 +1,15 @@
 import * as THREE from 'three';
 import { CelestialBody } from './CelestialBody.js';
 import { createOrbitLine, DynamicTrail } from './OrbitTrail.js';
-import { Comet, COMET_2 } from './Comet.js';
+import { Comet } from './Comet.js';
 import { AsteroidField } from './AsteroidField.js';
 import { SpaceStation } from './SpaceStation.js';
-import { SOLAR_SYSTEM, COMET, ASTEROID_BELT, STATION, SYSTEM_VISIBILITY } from '../config.js';
+import { SYSTEM_VISIBILITY } from '../config.js';
 
 export class SolarSystem {
-    constructor(scene) {
+    constructor(scene, systemConfig) {
         this._scene    = scene;
+        this.seed      = systemConfig.seed;
         this._planets  = [];
         this._time     = 0;
         this._trails   = [];
@@ -16,32 +17,39 @@ export class SolarSystem {
         this._orbitLines = [];
         this._orbitLinesVisible = true;
 
+        // Minden ehhez a rendszerhez tartozó objektum egy közös root alá kerül,
+        // így ugráskor egyetlen scene.add()/scene.remove() elég.
+        this.root = new THREE.Group();
+        scene.add(this.root);
+
         const sunPos = new THREE.Vector3(
-            SOLAR_SYSTEM.sun.position.x,
-            SOLAR_SYSTEM.sun.position.y,
-            SOLAR_SYSTEM.sun.position.z,
+            systemConfig.sun.position.x,
+            systemConfig.sun.position.y,
+            systemConfig.sun.position.z,
         );
 
         //üstökösök
         this.comet = new Comet({
-            ...COMET,
+            ...systemConfig.comet,
             orbitCenter: sunPos,
         });
-        scene.add(this.comet.group);
-        scene.add(this.comet.orbitLine);
-        this.comet2 = new Comet({ ...COMET_2, orbitCenter: sunPos });
-        scene.add(this.comet2.group);
-        scene.add(this.comet2.orbitLine);
+        this.root.add(this.comet.group);
+        this.root.add(this.comet.orbitLine);
+
+        this.comet2 = new Comet({ ...systemConfig.comet2, orbitCenter: sunPos });
+        this.root.add(this.comet2.group);
+        this.root.add(this.comet2.orbitLine);
 
         //aszteroida öv
-        this.asteroidBelt = new AsteroidField({ center: sunPos, ...ASTEROID_BELT });
-        scene.add(this.asteroidBelt.group);
+        this.asteroidBelt = new AsteroidField({ center: sunPos, ...systemConfig.asteroidBelt });
+        this.root.add(this.asteroidBelt.group);
 
         //űrállomás
-        this.station = new SpaceStation(STATION.position, STATION);
-        scene.add(this.station.group);
+        this.station = new SpaceStation(systemConfig.station.position, systemConfig.station);
+        this.station.destinationSeed = systemConfig.station.destinationSeed;
+        this.root.add(this.station.group);
 
-        for (const bodyConfig of SOLAR_SYSTEM.bodies) {
+        for (const bodyConfig of systemConfig.bodies) {
             const planet = new CelestialBody({
                 name:        bodyConfig.name,
                 radius:      bodyConfig.radius,
@@ -50,14 +58,14 @@ export class SolarSystem {
                 orbitCenter: sunPos,
             });
 
-            scene.add(planet.group);
+            this.root.add(planet.group);
 
             const orbitLine = createOrbitLine(bodyConfig.orbit, sunPos, bodyConfig.color);
-            scene.add(orbitLine);
+            this.root.add(orbitLine);
             this._orbitLines.push(orbitLine);
 
             this._trails.push({
-                trail: new DynamicTrail(scene, bodyConfig.color),
+                trail: new DynamicTrail(this.root, bodyConfig.color),
                 body:  planet,
             });
 
@@ -72,11 +80,11 @@ export class SolarSystem {
                         isMoon: true,
                     });
 
-                    scene.add(moon.group);
+                    this.root.add(moon.group);
                     planet.moons.push(moon);
 
                     this._trails.push({
-                        trail: new DynamicTrail(scene, moonConfig.color),
+                        trail: new DynamicTrail(this.root, moonConfig.color),
                         body:  moon,
                     });
                 }
@@ -84,6 +92,15 @@ export class SolarSystem {
 
             this._planets.push(planet);
         }
+    }
+
+    // --- Ugráskor a SystemManager ezt hívja ---
+    attach() {
+        this._scene.add(this.root);
+    }
+
+    detach() {
+        this._scene.remove(this.root);
     }
 
     update(cameraPosition) {
@@ -116,7 +133,6 @@ export class SolarSystem {
         this.station.update(cameraPosition);
     }
 
-
     setOrbitLinesVisible(visible) {
         this._orbitLinesVisible = visible;
         if (!visible) {
@@ -124,8 +140,6 @@ export class SolarSystem {
                 line.visible = false;
             }
         }
-
-        // ha visible=true, az update() majd a távolság alapján dönt soronként
         this.comet?.setOrbitLineVisible(visible);
         this.comet2?.setOrbitLineVisible(visible);
     }
@@ -137,7 +151,6 @@ export class SolarSystem {
                 trail.visible = false;
             }
         }
-        // ha visible=true, az update() majd a távolság alapján dönt soronként
     }
 
     getBodies() {

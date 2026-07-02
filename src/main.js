@@ -8,7 +8,7 @@ import { SolarSystem } from './entities/SolarSystem.js';
 import { MouseLook } from './controls/MouseLook.js';
 import { getOverlayElements } from './ui/overlay.js';
 import { spawnBackgroundObjects } from './entities/BackgroundObject.js';
-import { DUST_FIELD, GAME_START, BACKGROUND_OBJECTS as CFG, SHIP, MOUSE_SENSITIVITY } from './config.js';
+import { DUST_FIELD, GAME_START, BACKGROUND_OBJECTS as CFG, SHIP, MOUSE_SENSITIVITY, HOME_SYSTEM } from './config.js';
 import { Blink } from './ui/Blink.js';
 import { RippleOverlay } from './ui/RippleOverlay.js';
 import { Hud } from './ui/Hud.js';
@@ -19,6 +19,7 @@ import { MilkyWayBandPoints } from './entities/MilkyWayBand.js';
 import { NebulaFog } from './entities/NebulaFog.js';
 import { MessageManager } from './ui/MessageManager.js';
 import { RestApi } from './RestApi';
+import { SystemManager } from './core/SystemManager.js';
 
 async function init() {
     // --- CORE ---
@@ -26,7 +27,9 @@ async function init() {
     const camera   = createCamera();
     const renderer = createRenderer(camera);
     const hud = new Hud();
-// hud.updateBox('tl-1', { label: 'SPEED', value: '0.4' });
+    const systemManager = new SystemManager(scene);
+	systemManager.jumpTo('home');
+	
 
     let cameraRollAngle = 0;
 
@@ -49,7 +52,6 @@ async function init() {
 
     const fog = new NebulaFog(scene, CFG.skyDistance, '#1a1030');
 
-    const solarSystem = new SolarSystem(scene);
     
     // --- DEATH SEQUENCE ---
     const deathSequence = new DeathSequence();
@@ -81,11 +83,11 @@ async function init() {
 
     // --- TOGGLE ORBIT LINES ---
     let orbitLinesVisible = false;
-    solarSystem.setOrbitLinesVisible(orbitLinesVisible);
+    systemManager.current.setOrbitLinesVisible(orbitLinesVisible);
     window.addEventListener('keydown', (e) => {
         if (e.key === 't' || e.key === 'T') {
             orbitLinesVisible = !orbitLinesVisible;
-            solarSystem.setOrbitLinesVisible(orbitLinesVisible);
+            systemManager.current.setOrbitLinesVisible(orbitLinesVisible);
         }
         if (e.key === 'a' || e.key === 'A') keyState.rollLeft = true;
         if (e.key === 'd' || e.key === 'D') keyState.rollRight = true;
@@ -138,7 +140,7 @@ async function init() {
 
         cameraRollAngle += input.roll * SHIP.rollSpeed;
         ship.update(input);
-        solarSystem.update(camera.position);
+        systemManager.current.update(camera.position);
         updateCameraFollow(camera, ship);
 
 		// HUD boxok frissítése
@@ -146,11 +148,11 @@ async function init() {
 		hud.updateBox('bl-3', { value: `${throttle.toFixed(0)}% ${ship._thrustState}` });
 		hud.updateBox('bc-1', { value: ship.speed.toFixed(2) });
 		hud.updateBox('bc-3', { value: `${ship.heading.toFixed(0)}°` });
-		const nearestPlanet = getNearestPlanetAltitude(ship.position, solarSystem);
+		const nearestPlanet = getNearestPlanetAltitude(ship.position, systemManager.current);
 		if (nearestPlanet) {
 			hud.updateBox('bc-2', { value: formatAltitude(nearestPlanet.altitude) });
 		}
-		const stationDist = ship.position.distanceTo(solarSystem.station.position) - solarSystem.station.radius;
+		const stationDist = ship.position.distanceTo(systemManager.current.station.position) - systemManager.current.station.radius;
 		hud.updateBox('tc-2', { value: formatDistance(stationDist) });
 		
         // Roll utólag, a végső camera quaternion-ra
@@ -167,12 +169,26 @@ async function init() {
         fog.update(camera.position);
 
         // Ütközésvizsgálat a hajó és a bolygók/holdak között
-        const asteroidHit = solarSystem.asteroidBelt.checkCollision(ship.position);
-        const hitBody = asteroidHit || checkShipCollision(ship.position, [...solarSystem.getBodies(), sunCollider]);
+        const asteroidHit = systemManager.current.asteroidBelt.checkCollision(ship.position);
+        const hitBody = asteroidHit || checkShipCollision(ship.position, [...systemManager.current.getBodies(), sunCollider]);
         if (hitBody) {
             isGameOver = true;
             deathSequence.trigger();
         }
+
+		// Station megközelítése
+        const station = systemManager.current.station;
+		const distToStation = ship.position.distanceTo(station.position);
+
+		if (distToStation < station.radius * 1.5 && keys['e']) {
+			const nextSeed = station.destinationSeed;
+			systemManager.jumpTo(nextSeed);
+
+			// hajó pozicionálása az új rendszer station-je mellé
+			const newStation = systemManager.current.station;
+			ship.position.copy(newStation.position).add(new THREE.Vector3(0, 0, newStation.radius * 3));
+		}
+
 
         renderer.render(scene, camera);
     }

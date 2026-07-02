@@ -76,6 +76,22 @@ export const COMET = {
     },
 };
 
+export const COMET_2 = {
+    name: 'Comet-Retro',
+    radius: 10,
+    color: 0xffd9aa,
+    tailColor: 0xffcc88,
+    tailLength: 450,
+    tailWidth: 30,
+    orbit: {
+        semiMajorAxis: 13000,
+        eccentricity: 0.78,
+        inclination: THREE.MathUtils.degToRad(-35),
+        speed: -0.0014, // negatív = retrográd
+        phaseOffset: Math.PI,
+    },
+};
+
 export const STATION = {
     position: new THREE.Vector3(4000, 200, -6000),
     ringRadius: 220,
@@ -403,4 +419,17 @@ export const SOLAR_SYSTEM = {
             ],
         },
     ],
+};
+
+export const HOME_SYSTEM = {
+    seed: 'home',
+    sun: SOLAR_SYSTEM.sun,
+    bodies: SOLAR_SYSTEM.bodies,
+    comet: COMET,
+    comet2: COMET_2,
+    asteroidBelt: ASTEROID_BELT,
+    station: {
+        ...STATION,
+        destinationSeed: 'sys-042',   // ide vezet a station
+    },
 };
