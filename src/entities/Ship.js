@@ -44,6 +44,7 @@ export class Ship {
                 model.scale.setScalar(scale);
 
                 this.visualGroup.add(model);
+                this.visualGroup.visible = false; // alapból rejtve, csak hologramban látszik
             },
             (xhr) => {
                 if (xhr.total > 0) {

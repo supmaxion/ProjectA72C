@@ -18,7 +18,8 @@ import { MilkyWayBandPoints } from './entities/MilkyWayBand.js';
 // import { MilkyWayBandPanorama } from './entities/MilkyWayBand.js'; // ← váltáshoz kommenteld ki ezt és a fentit
 import { NebulaFog } from './entities/NebulaFog.js';
 import { MessageManager } from './ui/MessageManager.js';
-import { RestApi } from './RestApi'
+import { RestApi } from './RestApi';
+import { HologramViewer } from './ui/HologramViewer.js';
 
 async function init() {
     // --- CORE ---
@@ -27,6 +28,9 @@ async function init() {
     const renderer = createRenderer(camera);
     const hud = new Hud();
 // hud.updateBox('tl-1', { label: 'SPEED', value: '0.4' });
+
+    const hologram = new HologramViewer();
+    const HOLOGRAM_BOX_ID = 'tc-2'; // melyik dobozban jelenjen meg a hologram
 
     let cameraRollAngle = 0;
 
@@ -95,11 +99,23 @@ async function init() {
             hud.cycleActiveBox(e.shiftKey ? -1 : 1);
             messages?.markDone('tabCycle');
         }
+        if (e.key === 'Enter') {
+            const rect = hud.getGameWindowRect();
+            const clipPath = hud.getGameWindowClipPath();
+            if (rect) hologram.toggle(rect, clipPath);
+        }
     });
 
     window.addEventListener('keyup', (e) => {
         if (e.key === 'a' || e.key === 'A') keyState.rollLeft = false;
         if (e.key === 'd' || e.key === 'D') keyState.rollRight = false;
+    });
+
+    window.addEventListener('resize', () => {
+        if (hologram.isVisible()) {
+            const rect = hud.getBoxScreenRect(HOLOGRAM_BOX_ID);
+            if (rect) hologram._resize(rect);
+        }
     });
 
     // --- GAME LOOP ---
