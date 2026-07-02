@@ -70,10 +70,6 @@ export class Ship {
 
                 this.visualGroup.add(model);
 
-                // Vetítősugár, mint egy mozivetítő fénykúpja
-                const beamGroup = this._buildProjectorBeam(SHIP.modelSize);
-                this.visualGroup.add(beamGroup);
-
                 this.visualGroup.visible = false; // alapból rejtve, csak hologramban látszik
                 this._modelLoaded = true;
                 this._modelSource = model; // ebből klónozunk a hologramnak
@@ -90,46 +86,6 @@ export class Ship {
         );
     }
 
-    _buildProjectorBeam(modelWidth) {
-        const beamGroup = new THREE.Group();
-
-        // Kúp: keskeny csúcs (jobb-fent) → széles alap (a hajó szélessége)
-        const height = 14;
-        const radiusTop = 0.15;
-        const radiusBottom = Math.max(modelWidth * 0.9, 3);
-
-        const coneGeo = new THREE.CylinderGeometry(radiusTop, radiusBottom, height, 24, 1, true);
-        const coneMat = new THREE.MeshBasicMaterial({
-            color: 0x99ddff,
-            transparent: true,
-            opacity: 0.08,
-            blending: THREE.AdditiveBlending,
-            depthWrite: false,
-            side: THREE.DoubleSide,
-        });
-
-        const beam = new THREE.Mesh(coneGeo, coneMat);
-
-        // Alapból a henger/kúp lokálisan Y tengely mentén áll (csúcs fent, alap lent).
-        // Irányítsuk: csúcs = jobb-fent-hátul, alap = a hajó közepe.
-        const apex = new THREE.Vector3(11, 16, -1);
-        const base = new THREE.Vector3(30, 50, 80);
-        const dir = new THREE.Vector3().subVectors(base, apex);
-        const dist = dir.length();
-        dir.normalize();
-
-        beam.geometry.translate(0, -height / 2, 0); // csúcs kerüljön origóba
-        beam.scale.set(1, dist / height, 1);
-        beam.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
-        beam.position.copy(apex);
-
-        beamGroup.add(beam);
-
-        this._beamMaterial = coneMat;
-        this._beamMesh = beam;
-
-        return beamGroup;
-    }
 
     _buildFallback() {
         //holo
@@ -143,18 +99,11 @@ export class Ship {
             mat
         ); //holo
 
-        // const body = new THREE.Mesh(
-        //     new THREE.ConeGeometry(2, 6, 8),
-        //     new THREE.MeshStandardMaterial({ color: 0x88aacc, metalness: 0.4, roughness: 0.4 })
-        // );
         body.rotation.x = Math.PI / 2;
         this.visualGroup.add(body);
 
         body.rotation.x = Math.PI / 2;
         this.visualGroup.add(body);
-
-        const beamGroup = this._buildProjectorBeam(6);
-        this.visualGroup.add(beamGroup);
 
         this._modelSource = body;
     }
@@ -233,12 +182,6 @@ export class Ship {
         const flicker = 0.85 + Math.random() * 0.15;
         for (const mat of this._holoMaterials) {
             mat.opacity = this._holoBaseOpacity * flicker;
-        }
-
-        // Vetítősugár halvány, pulzáló flicker-je
-        if (this._beamMaterial) {
-            const beamFlicker = 0.6 + Math.random() * 0.4;
-            this._beamMaterial.opacity = 0.08 * beamFlicker;
         }
 
     }
