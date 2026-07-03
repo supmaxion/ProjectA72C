@@ -21,6 +21,7 @@ import { NebulaFog } from './entities/NebulaFog.js';
 import { MessageManager } from './ui/MessageManager.js';
 import { RestApi } from './RestApi';
 import { SystemManager } from './core/SystemManager.js';
+import { JumpTransition } from './ui/JumpTransition.js';
 
 async function init() {
     // --- CORE ---
@@ -30,7 +31,7 @@ async function init() {
     const hud = new Hud();
     const systemManager = new SystemManager(scene);
 	systemManager.jumpTo('home');
-	
+	const jumpTransition = new JumpTransition();
 
     let cameraRollAngle = 0;
     let jumpCooldown = 0;
@@ -188,6 +189,9 @@ async function init() {
 
 		if (jumpCooldown <= 0 && distToStation < station.radius * 1.5) {
 			const nextSeed = station.destinationSeed;
+			
+			jumpTransition.show('JUMPING');
+			
 			systemManager.jumpTo(nextSeed);
 
 			// hajó pozicionálása az új rendszer station-je mellé
@@ -195,6 +199,7 @@ async function init() {
 			ship.position.copy(newStation.position).add(new THREE.Vector3(0, 0, newStation.radius * 3));
 			
 			jumpCooldown = 3; // másodperc
+			setTimeout(() => jumpTransition.hide(), 800); // az overlay 0.8 mp-ig látszik
 
 		}
 

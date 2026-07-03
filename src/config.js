@@ -41,7 +41,8 @@ export const DUST_FIELD = {
 };
 
 export const SHIP = {
-    startPosition: new THREE.Vector3(0, 3000, 53000),//0,3000,70000
+    //~ startPosition: new THREE.Vector3(0, 3000, 53000),//0,3000,70000
+    startPosition: new THREE.Vector3(4000, 100, -6000),//0,3000,70000
     speed: 0.45,
     minSpeed: 0.01,
     maxSpeed: 300,
