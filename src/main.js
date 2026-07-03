@@ -90,7 +90,7 @@ async function init() {
     window.addEventListener('keydown', (e) => {
         if (e.key === 't' || e.key === 'T') {
             orbitLinesVisible = !orbitLinesVisible;
-            systemManager.current.setOrbitLinesVisible(orbitLinesVisible);
+            systemManager.setOrbitLinesVisible(orbitLinesVisible);
         }
         if (e.key === 'a' || e.key === 'A') keyState.rollLeft = true;
         if (e.key === 'd' || e.key === 'D') keyState.rollRight = true;
