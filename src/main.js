@@ -82,7 +82,7 @@ async function init() {
     //pislogás és hullám animáció
     let messages = null;
     if (GAME_START.blink) {
-        const blink = new Blink({ delay: 500 });
+        new Blink({ delay: 500 });
         messages = new MessageManager();
         messages.start();
     }
