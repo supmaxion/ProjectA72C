@@ -2,8 +2,6 @@ import * as THREE from 'three';
 import { SUN } from './../config.js';
 
 export function createSun({
-    direction = SUN.direction,
-    distance = SUN.distance,
     size = SUN.size,
     color = SUN.color,
     lightIntensity = SUN.lightIntensity,
