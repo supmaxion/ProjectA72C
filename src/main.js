@@ -22,6 +22,7 @@ import { MessageManager } from './ui/MessageManager.js';
 import { RestApi } from './RestApi';
 import { SystemManager } from './core/SystemManager.js';
 import { JumpTransition } from './ui/JumpTransition.js';
+import { SaveManager } from './core/SaveManager.js';
 
 async function init() {
     // --- CORE ---
@@ -29,15 +30,33 @@ async function init() {
     const camera   = createCamera();
     const renderer = createRenderer(camera);
     const hud = new Hud();
+    const saveManager = new SaveManager();
+    const savedState = saveManager.load();
     const systemManager = new SystemManager(scene);
 	systemManager.jumpTo('home');
 	const jumpTransition = new JumpTransition();
 
     let cameraRollAngle = 0;
     let jumpCooldown = 0;
-
+    let orbitLinesVisible = false;
+    
     // --- ENTITIES ---
     const ship = new Ship();
+    
+	if (savedState) {
+		systemManager.restoreFromSave(savedState);
+
+		ship.position.fromArray(savedState.ship.position);
+		ship.quaternion.fromArray(savedState.ship.quaternion);
+		ship.speed = savedState.ship.speed;
+
+		orbitLinesVisible = savedState.settings?.orbitLinesVisible ?? false;
+		systemManager.setOrbitLinesVisible(orbitLinesVisible);
+	} else {
+		systemManager.jumpTo('home');
+	}
+
+
     scene.add(ship.group);
 
     const { mesh, glow, light, ambientLight, collider: sunCollider } = createSun();
@@ -85,7 +104,6 @@ async function init() {
     const keyState = { rollLeft: false, rollRight: false };
 
     // --- TOGGLE ORBIT LINES ---
-    let orbitLinesVisible = false;
     systemManager.current.setOrbitLinesVisible(orbitLinesVisible);
     window.addEventListener('keydown', (e) => {
         if (e.key === 't' || e.key === 'T') {
@@ -193,7 +211,8 @@ async function init() {
 			jumpTransition.show('JUMPING');
 			
 			systemManager.jumpTo(nextSeed);
-
+			saveManager.save({ systemManager, ship, orbitLinesVisible });
+			
 			// hajó pozicionálása az új rendszer station-je mellé
 			const newStation = systemManager.current.station;
 			ship.position.copy(newStation.position).add(new THREE.Vector3(0, 0, newStation.radius * 3));
@@ -220,6 +239,15 @@ async function init() {
 		if (dist < 1000) return dist.toFixed(0);
 		return `${(dist / 1000).toFixed(1)}k`;
 	}
+	
+	//auto mentések
+	setInterval(() => {
+		saveManager.save({ systemManager, ship, orbitLinesVisible });
+	}, 10000);
+	// bezáráskor/frissítéskor:
+	window.addEventListener('beforeunload', () => {
+		saveManager.save({ systemManager, ship, orbitLinesVisible });
+	});
 	
     RestApi('Indul');
 
