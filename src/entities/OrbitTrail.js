@@ -91,9 +91,8 @@ export class DynamicTrail {
      * Hívd minden frame-ben a bolygó aktuális pozíciójával.
      * @param {THREE.Vector3} position
      * @param {number} now  performance.now() / 1000 (másodperc)
-     * @param {number} delta
      */
-    update(position, now, delta) {
+    update(position, now) {
         // Új pont hozzáadása (csak ha eleget mozdult)
         const last = this._buffer[this._buffer.length - 1];
         if (!last || position.distanceTo(last.pos) > ORBIT_TRAIL.minDistance) {
