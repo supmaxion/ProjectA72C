@@ -74,7 +74,11 @@ async function init() {
 
     
     // --- DEATH SEQUENCE ---
-    const deathSequence = new DeathSequence();
+    const deathSequence = new DeathSequence({
+		onRestart: () => {
+			saveManager.clear(); // ne töltődjön be a halál-pozíció
+		},
+	});
     let isGameOver = false;
 
     const backgroundObjects = spawnBackgroundObjects(scene);
@@ -203,7 +207,7 @@ async function init() {
         const station = systemManager.current.station;
 		const distToStation = ship.position.distanceTo(station.position);
 
-		if (jumpCooldown <= 0 && distToStation < station.radius * 1.5) {
+		if (jumpCooldown <= 0 && distToStation < station.radius * 0.8) {
 			const nextSeed = station.destinationSeed;
 			
 			jumpTransition.show('JUMPING');
@@ -240,10 +244,12 @@ async function init() {
 	
 	//auto mentések
 	setInterval(() => {
+		if (isGameOver) return; // ne mentsen halott állapotot
 		saveManager.save({ systemManager, ship, orbitLinesVisible });
 	}, 10000);
 	// bezáráskor/frissítéskor:
 	window.addEventListener('beforeunload', () => {
+		if (isGameOver) return;
 		saveManager.save({ systemManager, ship, orbitLinesVisible });
 	});
 	

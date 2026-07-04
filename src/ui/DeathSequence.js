@@ -1,7 +1,8 @@
 import { RestApi } from '../RestApi'
 
 export class DeathSequence {
-    constructor() {
+    constructor({ onRestart } = {}) {
+		this._onRestart = onRestart;
         this._injectStyles();
         this._buildDom();
 
@@ -143,7 +144,7 @@ export class DeathSequence {
             <div id="death-subtitle">Ship integrity lost — surface impact</div>
             <button id="death-restart-btn">Restart</button>
         `;
-
+        
         overlay.appendChild(flash);
         overlay.appendChild(shatter);
         overlay.appendChild(glitch);
@@ -158,6 +159,7 @@ export class DeathSequence {
         this.restartBtn = screen.querySelector('#death-restart-btn');
 
         this.restartBtn.addEventListener('click', () => {
+			this._onRestart?.();
             window.location.reload();
         });
 
