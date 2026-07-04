@@ -54,11 +54,16 @@ async function init() {
 	} else {
 		systemManager.jumpTo('home');
 	}
+	
+	let lastMinedMessage = null;
+	let lastMinedMessageTime = 0;
 
 	const inventory = savedState?.inventory ?? {};
 	const miningSystem = new MiningSystem(scene, camera, inventory, {
 		onAsteroidMined: (result) => {
 			messages?.markDone('firstMining'); // opcionális, ha van ilyen üzenet-lépés
+			lastMinedMessage = `+${result.amount} ${result.materialType.toUpperCase()}`;
+			lastMinedMessageTime = performance.now();
 		},
 	});
 
@@ -196,6 +201,13 @@ async function init() {
 			: 'IDLE'
 		);
 		hud.updateInventoryLine(`REGOLIT: ${inventory.regolit ?? 0}`);
+		// kibányászva:
+		if (lastMinedMessage && performance.now() - lastMinedMessageTime < 3000) {
+			hud.updateStatusLine('left', lastMinedMessage);
+		} else {
+			hud.updateStatusLine('left', '');
+			lastMinedMessage = null;
+		}
 		//*** HUD boxok frissítése
 		
 		
