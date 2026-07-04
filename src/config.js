@@ -108,6 +108,29 @@ export const ASTEROID_BELT = {
     color: 0x8a7d6e,
 };
 
+export const MINING = {
+    range: 500,                 // ha ennél közelebb van a hajó egy aszteroidához, kinyúlik a csáp
+    viewAngleDeg: 30,          // csak ebben a kúpban keres célpontot a hajó orra előtt (oldalt/hátul nem érdekel)
+    extendDuration: 0.4,       // csáp kinyúlási animáció, mp
+    duration: 5,               // tényleges bányászási idő, mp
+    retractDuration: 0.3,      // csáp visszahúzási animáció, mp
+    yieldAmount: { min: 8, max: 20 },   // mennyi anyagot ad egy aszteroida
+    tentacleStartLocalOffset: new THREE.Vector3(0, -6, -15), // kamera-lokális pont: kép alja, közel
+    tentacleColor: 0x66ccff,
+    tipColor: 0x99e5ff,
+    materialChunkRadius: 2.2, 
+    explosionChunkCount: 3,
+    explosionDuration: 5,             // mp, amíg a robbanás-darabok elhalványulnak
+    explosionKickSpeed: { min: 8, max: 16 }, 
+};
+
+export const MATERIALS = {
+    types: [
+        { id: 'regolit', weight: 1, color: 0xc9bfae },
+        // ide jöhet később pl. { id: 'nikkelvas', weight: 0.4 } — a weight a relatív gyakoriságot szabja
+    ],
+};
+
 export const ORBIT_TRAIL = {
     ellipsePoints:    180,     // statikus ellipszis pontjainak száma
     ellipseOpacity:   0.18,    // halvány

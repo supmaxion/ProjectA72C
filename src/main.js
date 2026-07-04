@@ -21,6 +21,7 @@ import { RestApi } from './RestApi';
 import { SystemManager } from './core/SystemManager.js';
 import { JumpTransition } from './ui/JumpTransition.js';
 import { SaveManager } from './core/SaveManager.js';
+import { MiningSystem } from './physics/MiningSystem.js';
 
 async function init() {
     // --- CORE ---
@@ -31,7 +32,7 @@ async function init() {
     const saveManager = new SaveManager();
     const savedState = saveManager.load();
     const systemManager = new SystemManager(scene);
-	systemManager.jumpTo('home');
+	//~ systemManager.jumpTo('home');
 	const jumpTransition = new JumpTransition();
 
     let cameraRollAngle = 0;
@@ -54,6 +55,12 @@ async function init() {
 		systemManager.jumpTo('home');
 	}
 
+	const inventory = savedState?.inventory ?? {};
+	const miningSystem = new MiningSystem(scene, camera, inventory, {
+		onAsteroidMined: (result) => {
+			messages?.markDone('firstMining'); // opcionális, ha van ilyen üzenet-lépés
+		},
+	});
 
     scene.add(ship.group);
 
@@ -76,7 +83,7 @@ async function init() {
     // --- DEATH SEQUENCE ---
     const deathSequence = new DeathSequence({
 		onRestart: () => {
-			saveManager.clear(); // ne töltődjön be a halál-pozíció
+			//~ saveManager.clear(); // ne töltődjön be a halál-pozíció
 		},
 	});
     let isGameOver = false;
@@ -164,9 +171,11 @@ async function init() {
         cameraRollAngle += input.roll * SHIP.rollSpeed;
         ship.update(input);
         systemManager.current.update(camera.position);
-        updateCameraFollow(camera, ship);
 
-		// HUD boxok frissítése
+
+        updateCameraFollow(camera, ship);
+        
+		//*** HUD boxok frissítése
 		const throttle = ((ship.speed - SHIP.minSpeed) / (SHIP.maxSpeed - SHIP.minSpeed)) * 100;
 		hud.updateBox('bl-3', { value: `${throttle.toFixed(0)}% ${ship._thrustState}` });
 		hud.updateBox('bc-1', { value: ship.speed.toFixed(2) });
@@ -177,6 +186,18 @@ async function init() {
 		}
 		const stationDist = ship.position.distanceTo(systemManager.current.station.position) - systemManager.current.station.radius;
 		hud.updateBox('tc-2', { value: formatDistance(stationDist) });
+		
+		//bányászat
+		miningSystem.update(delta, ship, systemManager.current.asteroidBelt);
+		// Bányászat-státusz és inventory a status stripre
+		const miningInfo = miningSystem.getProgressInfo();
+		hud.updateStatusLine('center', miningInfo
+			? `MINING ${((miningInfo.time / miningInfo.duration) * 100).toFixed(0)}%`
+			: 'IDLE'
+		);
+		hud.updateInventoryLine(`REGOLIT: ${inventory.regolit ?? 0}`);
+		//*** HUD boxok frissítése
+		
 		
         // Roll utólag, a végső camera quaternion-ra
         // cameraRollAngle += input.roll * SHIP.rollSpeed; // ez törölve lett
@@ -196,6 +217,25 @@ async function init() {
         const hitBody = asteroidHit || checkShipCollision(ship.position, [...systemManager.current.getCollidableBodies(), sunCollider]);
         if (hitBody) {
             isGameOver = true;
+            
+			// Mentsünk a halál pillanatában is — az inventory és a kibányászott aszteroidák
+			// (systemState) ne vesszenek el —, de a hajó pozícióját írjuk felül egy
+			// biztonságos ponttal (a station mellé), nehogy a halál-helyszín (bolygó/nap
+			// belseje) töltődjön vissza újraindításkor.
+			const safePosition = systemManager.current.station.position.clone()
+				.add(new THREE.Vector3(0, 0, systemManager.current.station.radius * 3));
+
+			saveManager.save({
+				systemManager,
+				ship: {
+					position: safePosition,
+					quaternion: ship.quaternion.clone(),
+					speed: SHIP.speed,
+				},
+				orbitLinesVisible,
+				inventory,
+			});
+    
             deathSequence.trigger();
         }
 
@@ -213,7 +253,7 @@ async function init() {
 			jumpTransition.show('JUMPING');
 			
 			systemManager.jumpTo(nextSeed);
-			saveManager.save({ systemManager, ship, orbitLinesVisible });
+			saveManager.save({ systemManager, ship, orbitLinesVisible, inventory });
 			
 			// hajó pozicionálása az új rendszer station-je mellé
 			const newStation = systemManager.current.station;
@@ -245,12 +285,12 @@ async function init() {
 	//auto mentések
 	setInterval(() => {
 		if (isGameOver) return; // ne mentsen halott állapotot
-		saveManager.save({ systemManager, ship, orbitLinesVisible });
+		saveManager.save({ systemManager, ship, orbitLinesVisible, inventory });
 	}, 10000);
 	// bezáráskor/frissítéskor:
 	window.addEventListener('beforeunload', () => {
 		if (isGameOver) return;
-		saveManager.save({ systemManager, ship, orbitLinesVisible });
+		saveManager.save({ systemManager, ship, orbitLinesVisible, inventory });
 	});
 	
     RestApi('Indul');

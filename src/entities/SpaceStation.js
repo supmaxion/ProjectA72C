@@ -28,7 +28,7 @@ export class SpaceStation {
     }
 
     update(cameraPosition) {
-        this.ring.rotation.z += 0.0015;
+        this.ring.rotation.y += 0.0015;
 
         if (cameraPosition) {
             const dist = this.position.distanceTo(cameraPosition);

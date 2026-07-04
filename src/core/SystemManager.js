@@ -6,8 +6,9 @@ export class SystemManager {
     constructor(scene) {
         this._scene = scene;
         this._cache = new Map();
-        this._links = new Map();       // seed -> returnSeed (station célpontja)
-        this._pendingTimes = new Map(); // betöltéskor: seed -> mentett _time, amíg a rendszer még nem jött létre
+        this._links = new Map();          // seed -> returnSeed (station célpontja)
+        this._pendingTimes = new Map();   // betöltéskor: seed -> mentett _time, amíg a rendszer még nem jött létre
+        this._pendingMinedIds = new Map(); // betöltéskor: seed -> mentett minedAsteroidIds[]
         this.current = null;
         this.orbitLinesVisible = false;
     }
@@ -23,9 +24,18 @@ export class SystemManager {
         if (!system) {
             const returnSeed = this._links.get(seed) ?? cameFrom;
 
-            const config = seed === 'home'
+            const baseConfig = seed === 'home'
                 ? HOME_SYSTEM
                 : generateSystemConfig(seed, { returnSeed });
+
+            const minedAsteroidIds = this._pendingMinedIds.get(seed) ?? [];
+            const config = {
+                ...baseConfig,
+                asteroidBelt: {
+                    ...baseConfig.asteroidBelt,
+                    minedIds: minedAsteroidIds,
+                },
+            };
 
             system = new SolarSystem(this._scene, config);
 
@@ -37,6 +47,7 @@ export class SystemManager {
                 system._time = this._pendingTimes.get(seed);
                 this._pendingTimes.delete(seed);
             }
+            this._pendingMinedIds.delete(seed);
 
             this._cache.set(seed, system);
         } else {
@@ -59,9 +70,13 @@ export class SystemManager {
     getSaveData() {
         const systemTimes = {};
         const systemLinks = {};
+        const systemState = {};
 
         for (const [seed, system] of this._cache) {
             systemTimes[seed] = system._time;
+            systemState[seed] = {
+                minedAsteroidIds: Array.from(system.asteroidBelt.minedIds),
+            };
         }
         for (const [seed, returnSeed] of this._links) {
             systemLinks[seed] = returnSeed;
@@ -72,12 +87,18 @@ export class SystemManager {
             visitedSeeds: [...this._cache.keys()],
             systemTimes,
             systemLinks,
+            systemState,
         };
     }
 
     restoreFromSave(data) {
         this._links = new Map(Object.entries(data.systemLinks ?? {}));
         this._pendingTimes = new Map(Object.entries(data.systemTimes ?? {}));
+        this._pendingMinedIds = new Map(
+            Object.entries(data.systemState ?? {}).map(
+                ([seed, state]) => [seed, state.minedAsteroidIds ?? []]
+            )
+        );
         this.jumpTo(data.currentSeed ?? 'home');
     }
 }

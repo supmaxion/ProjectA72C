@@ -10,6 +10,11 @@
  * dől a képernyő közepe felé (mint egy "/" a jobb oldalon,
  * "\" a bal oldalon). A 3 középső boxnak nincs dőlése.
  *
+ * A felső 9 box alatt (és a játékablak fölött) egy kékes,
+ * hologram-szerű "status strip" fut két sorban:
+ *   - 1. sor: 3 különálló szöveghely (a 3 box-csoport alatt)
+ *   - 2. sor: egy teljes szélességű inventory-sor
+ *
  * Tab navigációhoz előkészítve: setActiveBox(id) kiemeli a megadott
  * boxot, cycleActiveBox(dir) körkörösen lépked rajtuk.
  *
@@ -17,6 +22,8 @@
  *   const hud = new Hud();
  *   hud.updateBox('tl-1', { label: 'SPEED', value: '0.4' });
  *   hud.setActiveBox('tc-2');
+ *   hud.updateStatusLine('center', 'MINING: 3/5s');
+ *   hud.updateInventoryLine('REGOLIT: 40');
  */
 export class Hud {
     constructor() {
@@ -29,6 +36,7 @@ export class Hud {
         this._buildDOM();
         this._updateViewBox();
         this._buildSVG();
+        this._startHoloFlicker();
 
         window.addEventListener('resize', () => {
             this._updateViewBox();
@@ -76,9 +84,17 @@ export class Hud {
         const W = this._vbW;
         const H = this._vbH;
 
-        const T = 34;  // top/bottom keret vastagság
+        const T = 34;  // eredeti top/bottom box-sáv vastagsága (a 9-9 box mérete ettől függ)
         const S = 22;  // oldal keret vastagság
         const CI = 50; // belső (játékablak) 8 szögű sarokvágás
+
+        // --- Status strip (2 sor) a felső boxok és a játékablak között ---
+        const STATUS_ROW_H   = 15;
+        const STATUS_ROW_GAP = 3;
+        const boxBottom = 2.4 + (T - 4.8); // a felső boxok alsó éle
+        const statusY1 = boxBottom + STATUS_ROW_GAP;
+        const statusY2 = statusY1 + STATUS_ROW_H + STATUS_ROW_GAP;
+        const T_TOP = statusY2 + STATUS_ROW_H + STATUS_ROW_GAP; // itt kezdődik a játékablak felső éle
 
         const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
         defs.innerHTML = `
@@ -109,10 +125,10 @@ export class Hud {
         const outerPath = `M 0 0 L ${W} 0 L ${W} ${H} L 0 ${H} Z`;
 
         const innerPath = `
-            M ${S + CI} ${T} L ${W - S - CI} ${T}
-            L ${W - S} ${T + CI} L ${W - S} ${H - T - CI}
+            M ${S + CI} ${T_TOP} L ${W - S - CI} ${T_TOP}
+            L ${W - S} ${T_TOP + CI} L ${W - S} ${H - T - CI}
             L ${W - S - CI} ${H - T} L ${S + CI} ${H - T}
-            L ${S} ${H - T - CI} L ${S} ${T + CI} Z
+            L ${S} ${H - T - CI} L ${S} ${T_TOP + CI} Z
         `;
 
         const frame = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -132,13 +148,14 @@ export class Hud {
 
         // referencia a nagy játékablakhoz (hologram stb. ehhez pozicionálható)
         this._gameWindowEl = innerEdge;
-        this._gameWindowMetrics = { W, H, T, S, CI };
+        this._gameWindowMetrics = { W, H, T, S, CI, T_TOP };
 
         // ─── BOXOK ────────────────────────────────────────────────────────
         this._boxes = {};
         this._buildTopRow(W, T, S, CI);
         this._buildBottomRow(W, H, T, S, CI);
-        this._buildCornerAccents(W, H, S, T, CI);
+        this._buildCornerAccents(W, H, S, T, CI, T_TOP);
+        this._buildStatusStrip(W, S, CI, statusY1, statusY2, STATUS_ROW_H);
 
         // Ha volt aktív box, állítsuk vissza kiemelését újraépítés után
         if (this._activeId) this._applyActiveStyle(this._activeId);
@@ -272,10 +289,10 @@ export class Hud {
         });
     }
 
-    _buildCornerAccents(W, H, S, T, CI) {
+    _buildCornerAccents(W, H, S, T, CI, T_TOP) {
         const corners = [
-            [S + CI + 4, T],
-            [W - S - CI - 4, T],
+            [S + CI + 4, T_TOP],
+            [W - S - CI - 4, T_TOP],
             [S + CI + 4, H - T],
             [W - S - CI - 4, H - T],
         ];
@@ -298,6 +315,100 @@ export class Hud {
                 this._svg.appendChild(l);
             });
         });
+    }
+
+    // ─── STATUS STRIP (hologram-szerű, flicker-elő) ────────────────────
+
+    _buildStatusStrip(W, S, CI, y1, y2, rowH) {
+        const bw  = 70;
+        const gap = 3.6;
+        const groupWidth = bw * 3 + gap * 2;
+
+        const leftGroupX  = S + CI + 5;
+        const midGroupX   = W / 2 - (bw * 1.5 + gap);
+        const rightEnd    = W - S - CI - 5;
+        const rightGroupX = rightEnd - groupWidth - gap;
+
+        this._statusSlots = {
+            left:   this._makeHoloRow(leftGroupX,  y1, groupWidth, rowH, ''),
+            center: this._makeHoloRow(midGroupX,   y1, groupWidth, rowH, ''),
+            right:  this._makeHoloRow(rightGroupX,  y1, groupWidth, rowH, ''),
+        };
+
+        const invX = leftGroupX;
+        const invW = (rightGroupX + groupWidth) - leftGroupX;
+        this._inventoryRow = this._makeHoloRow(invX, y2, invW, rowH, 'INVENTORY: ---');
+    }
+
+    _makeHoloRow(x, y, w, h, initialText) {
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+
+        const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        bg.setAttribute('x', x);
+        bg.setAttribute('y', y);
+        bg.setAttribute('width', w);
+        bg.setAttribute('height', h);
+        bg.setAttribute('rx', 2);
+        bg.setAttribute('fill', '#123a52');
+        bg.setAttribute('fill-opacity', '0.32');
+        bg.setAttribute('stroke', '#4a9ad0');
+        bg.setAttribute('stroke-width', '0.6');
+        bg.setAttribute('stroke-opacity', '0.7');
+        g.appendChild(bg);
+
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', x + w / 2);
+        text.setAttribute('y', y + h / 2 + 3.2);
+        text.setAttribute('text-anchor', 'middle');
+        text.setAttribute('font-family', 'Courier New, monospace');
+        text.setAttribute('font-size', '9.5');
+        text.setAttribute('fill', '#8fe0ff');
+        text.setAttribute('letter-spacing', '0.5');
+        text.setAttribute('filter', 'url(#hudGlow)');
+        text.textContent = initialText;
+        g.appendChild(text);
+
+        this._svg.appendChild(g);
+        return { g, bg, text };
+    }
+
+    /**
+     * Frissíti az egyik status-sávot ('left' | 'center' | 'right').
+     * A 3 szeparált szöveghely a 3 felső box-csoport alatt van.
+     */
+    updateStatusLine(slot, text) {
+        const row = this._statusSlots?.[slot];
+        if (!row) return;
+        row.text.textContent = text;
+    }
+
+    /** Frissíti a teljes szélességű inventory-sort. */
+    updateInventoryLine(text) {
+        if (!this._inventoryRow) return;
+        this._inventoryRow.text.textContent = text;
+    }
+
+    /**
+     * Folyamatos, hajó-hologramhoz hasonló flicker animáció a status
+     * stripre — nem függ a data-frissítésektől, saját rAF-loopon fut.
+     */
+    _startHoloFlicker() {
+        const animate = () => {
+            if (this._statusSlots) {
+                for (const key in this._statusSlots) {
+                    const flicker = 0.8 + Math.random() * 0.2;
+                    this._statusSlots[key].bg.setAttribute('fill-opacity', (0.32 * flicker).toFixed(2));
+                    this._statusSlots[key].text.setAttribute('opacity', flicker.toFixed(2));
+                }
+            }
+            if (this._inventoryRow) {
+                const flicker = 0.8 + Math.random() * 0.2;
+                this._inventoryRow.bg.setAttribute('fill-opacity', (0.32 * flicker).toFixed(2));
+                this._inventoryRow.text.setAttribute('opacity', flicker.toFixed(2));
+            }
+            this._flickerRAF = requestAnimationFrame(animate);
+        };
+        animate();
     }
 
     _defaultLabel(id) {
@@ -348,12 +459,13 @@ export class Hud {
     getGameWindowClipPath() {
         const m = this._gameWindowMetrics;
         if (!m) return null;
-        const { W, H, T, S, CI } = m;
+        const { W, H, T, S, CI, T_TOP } = m;
         const width = W - 2 * S;
-        const height = H - 2 * T;
+        const height = H - T_TOP - T;
         const cx = (CI / width) * 100;
-        const cy = (CI / height) * 100;
-        return `polygon(${cx}% 0%, ${100 - cx}% 0%, 100% ${cy}%, 100% ${100 - cy}%, ${100 - cx}% 100%, ${cx}% 100%, 0% ${100 - cy}%, 0% ${cy}%)`;
+        const cyTop = (CI / height) * 100;
+        const cyBottom = (CI / height) * 100;
+        return `polygon(${cx}% 0%, ${100 - cx}% 0%, 100% ${cyTop}%, 100% ${100 - cyBottom}%, ${100 - cx}% 100%, ${cx}% 100%, 0% ${100 - cyBottom}%, 0% ${cyTop}%)`;
     }
 
     // ─── AKTÍV BOX / TAB NAVIGÁCIÓ ──────────────────────────────────────
@@ -414,6 +526,7 @@ export class Hud {
     }
 
     dispose() {
+        if (this._flickerRAF) cancelAnimationFrame(this._flickerRAF);
         document.body.removeChild(this._wrapper);
     }
 }

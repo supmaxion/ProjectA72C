@@ -41,7 +41,12 @@ export class SolarSystem {
         this.root.add(this.comet2.orbitLine);
 
         //aszteroida öv
-        this.asteroidBelt = new AsteroidField({ center: sunPos, ...systemConfig.asteroidBelt });
+        this.asteroidBelt = new AsteroidField({
+			center: sunPos,
+			...systemConfig.asteroidBelt,
+			seed: systemConfig.seed,
+			beltId: 'main',
+		});
         this.root.add(this.asteroidBelt.group);
 
         //űrállomás
