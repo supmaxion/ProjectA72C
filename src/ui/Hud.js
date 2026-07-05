@@ -26,12 +26,16 @@
  *   hud.updateInventoryLine('REGOLIT: 40');
  */
 export class Hud {
-    constructor() {
+    constructor({ controls = [] } = {}) {
         this._activeId = null;
-        this._boxOrder = [
-            'tl-1', 'tl-2', 'tl-3', 'tc-1', 'tc-2', 'tc-3', 'tr-1', 'tr-2', 'tr-3',
-            'br-3', 'br-2', 'br-1', 'bc-3', 'bc-2', 'bc-1', 'bl-3', 'bl-2', 'bl-1',
-        ];
+
+        // Vezérlők (alsó sor, csak Tab/Space-szel elérhető)
+        this._controls = {};
+        controls.forEach(c => {
+            this._controls[c.id] = { label: c.label, state: !!c.initial, onToggle: c.onToggle };
+        });
+        this._controlBoxOrder = controls.map(c => c.id);
+        this._boxOrder = this._controlBoxOrder;
 
         this._buildDOM();
         this._updateViewBox();
@@ -44,7 +48,9 @@ export class Hud {
             this._buildSVG();
         });
 
-        this.setActiveBox('tc-1');
+        if (this._controlBoxOrder.length) {
+            this.setActiveBox(this._controlBoxOrder[0]);
+        }
     }
 
     _buildDOM() {
@@ -262,33 +268,151 @@ export class Hud {
         });
     }
 
-    _buildBottomRow(W, H, T, S, CI) {
+	_buildBottomRow(W, H, T, S, CI) {
         const h   = T - 4.8;
         const y   = H - h - 2.4;
         const bw  = 70;
         const gap = 3.6;
 
+        const positions = {};
         const leftStart = S + CI + 5;
         ['bl-1', 'bl-2', 'bl-3'].forEach((id, i) => {
-            const x = leftStart + i * (bw + gap);
-            const skew = -this._skewForX(x + bw / 2, W);
-            this._makeBox(id, x, y, bw, h, skew, this._defaultLabel(id), this._defaultValue(id));
+            positions[id] = leftStart + i * (bw + gap);
         });
-
         const midStart = W / 2 - (bw * 1.5 + gap);
         ['bc-1', 'bc-2', 'bc-3'].forEach((id, i) => {
-            const x = midStart + i * (bw + gap);
-            this._makeBox(id, x, y, bw, h, 0, this._defaultLabel(id), this._defaultValue(id));
+            positions[id] = midStart + i * (bw + gap);
         });
-
         const rightEnd = W - S - CI - 5;
         ['br-1', 'br-2', 'br-3'].forEach((id, i) => {
-            const x = rightEnd - (3 - i) * (bw + gap);
+            positions[id] = rightEnd - (3 - i) * (bw + gap);
+        });
+
+        Object.entries(positions).forEach(([id, x]) => {
             const skew = -this._skewForX(x + bw / 2, W);
-            this._makeBox(id, x, y, bw, h, skew, this._defaultLabel(id), this._defaultValue(id));
+            if (this._controls[id]) {
+                this._makeToggleBox(id, x, y, bw, h, skew, this._controls[id].label);
+            } else {
+                this._makePlaceholderBox(x, y, bw, h, skew);
+            }
         });
     }
 
+_makeToggleBox(id, x, y, w, h, skew, label) {
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        g.setAttribute('data-hud-box', id);
+
+        const sk = skew;
+        const points = [
+            [x + sk,     y + 1],
+            [x + w + sk, y + 1],
+            [x + w - sk, y + h - 1],
+            [x - sk,     y + h - 1],
+        ].map(p => p.join(',')).join(' ');
+
+        const bg = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+        bg.setAttribute('points', points);
+        bg.setAttribute('fill', 'url(#hudBoxGrad)');
+        bg.setAttribute('stroke', '#2a4a6a');
+        bg.setAttribute('stroke-width', '0.7');
+        g.appendChild(bg);
+
+        const lbl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        lbl.setAttribute('x', x + w / 2);
+        lbl.setAttribute('y', y + 7.5);
+        lbl.setAttribute('text-anchor', 'middle');
+        lbl.setAttribute('font-family', 'Courier New, monospace');
+        lbl.setAttribute('font-size', '7.6');
+        lbl.setAttribute('fill', '#4a8aaa');
+        lbl.setAttribute('letter-spacing', '0.6');
+        lbl.textContent = label;
+        g.appendChild(lbl);
+
+        // --- kétállású kapcsoló ---
+        const swW = 26, swH = 10;
+        const swX = x + w / 2 - swW / 2;
+        const swY = y + h - swH - 4;
+
+        const track = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        track.setAttribute('x', swX);
+        track.setAttribute('y', swY);
+        track.setAttribute('width', swW);
+        track.setAttribute('height', swH);
+        track.setAttribute('rx', swH / 2);
+        track.setAttribute('fill', '#0d1520');
+        track.setAttribute('stroke', '#2a4a6a');
+        track.setAttribute('stroke-width', '0.7');
+        g.appendChild(track);
+
+        const knobR = swH / 2 - 1;
+        const knob = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        knob.setAttribute('cy', swY + swH / 2);
+        knob.setAttribute('r', knobR);
+        knob.setAttribute('filter', 'url(#hudGlow)');
+        g.appendChild(knob);
+
+        this._svg.appendChild(g);
+        this._boxes[id] = { g, bg, lbl, type: 'toggle', track, knob, swX, swW, knobR };
+        this._applyToggleVisual(id, this._controls[id]?.state ?? false);
+    }
+
+    _makePlaceholderBox(x, y, w, h, skew) {
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        const sk = skew;
+        const points = [
+            [x + sk,     y + 1],
+            [x + w + sk, y + 1],
+            [x + w - sk, y + h - 1],
+            [x - sk,     y + h - 1],
+        ].map(p => p.join(',')).join(' ');
+
+        const bg = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+        bg.setAttribute('points', points);
+        bg.setAttribute('fill', 'url(#hudBoxGrad)');
+        bg.setAttribute('fill-opacity', '0.4');
+        bg.setAttribute('stroke', '#1a2a3a');
+        bg.setAttribute('stroke-width', '0.5');
+        g.appendChild(bg);
+
+        const dots = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        dots.setAttribute('x', x + w / 2);
+        dots.setAttribute('y', y + h / 2 + 3);
+        dots.setAttribute('text-anchor', 'middle');
+        dots.setAttribute('font-family', 'Courier New, monospace');
+        dots.setAttribute('font-size', '9');
+        dots.setAttribute('fill', '#2a4a5a');
+        dots.textContent = '· · ·';
+        g.appendChild(dots);
+
+        this._svg.appendChild(g);
+    }
+
+    _applyToggleVisual(id, state) {
+        const box = this._boxes[id];
+        if (!box || box.type !== 'toggle') return;
+        const onX  = box.swX + box.swW - box.knobR - 1;
+        const offX = box.swX + box.knobR + 1;
+        box.knob.setAttribute('cx', state ? onX : offX);
+        box.knob.setAttribute('fill', state ? '#6affa0' : '#3a5a6a');
+        box.track.setAttribute('stroke', state ? '#4ad080' : '#2a4a6a');
+    }
+
+    /** Kívülről szinkronizálja a kapcsoló vizuális állapotát (pl. mentés betöltésekor), callback hívása nélkül. */
+    setControlState(id, state) {
+        if (!this._controls[id]) return;
+        this._controls[id].state = state;
+        this._applyToggleVisual(id, state);
+    }
+
+    /** Az aktív (Tab-bal kiválasztott) vezérlőt kapcsolja át — Space-re hívandó. */
+    toggleActiveControl() {
+        const ctrl = this._controls[this._activeId];
+        if (!ctrl) return;
+        ctrl.state = !ctrl.state;
+        this._applyToggleVisual(this._activeId, ctrl.state);
+        ctrl.onToggle?.(ctrl.state);
+    }
+    
     _buildCornerAccents(W, H, S, T, CI, T_TOP) {
         const corners = [
             [S + CI + 4, T_TOP],
@@ -413,24 +537,30 @@ export class Hud {
 
     _defaultLabel(id) {
         const labels = {
-            'tl-1': 'SHIELD', 'tl-2': 'HULL', 'tl-3': 'POWER',
-            'tc-1': 'TARGET', 'tc-2': 'DIST',  'tc-3': 'BEARING',
-            'tr-1': 'RADAR',  'tr-2': 'COMM',  'tr-3': 'NAV',
-            'bl-1': 'FUEL',   'bl-2': 'TEMP',  'bl-3': 'THROTTLE',
-            'bc-1': 'SPEED',  'bc-2': 'ALT',   'bc-3': 'HEADING',
-            'br-1': 'CARGO',  'br-2': 'CREW',  'br-3': 'SYS',
+			'tl-1': 'DIST',   'tl-2': 'FUEL',   'tl-3': 'THROTTLE',
+            'tc-1': 'SPEED',  'tc-2': 'ALT',    'tc-3': 'HEADING',
+            'tr-1': 'CARGO',  'tr-2': 'SHIELD', 'tr-3': 'HULL',
+            //~ 'tl-1': 'SHIELD', 'tl-2': 'HULL', 'tl-3': 'POWER',
+            //~ 'tc-1': 'TARGET', 'tc-2': 'DIST',  'tc-3': 'BEARING',
+            //~ 'tr-1': 'RADAR',  'tr-2': 'COMM',  'tr-3': 'NAV',
+            //~ 'bl-1': 'FUEL',   'bl-2': 'TEMP',  'bl-3': 'THROTTLE',
+            //~ 'bc-1': 'SPEED',  'bc-2': 'ALT',   'bc-3': 'HEADING',
+            //~ 'br-1': 'CARGO',  'br-2': 'CREW',  'br-3': 'SYS',
         };
         return labels[id] ?? id.toUpperCase();
     }
 
     _defaultValue(id) {
         const values = {
-            'tl-1': '100%',  'tl-2': '98%',   'tl-3': 'OK',
-            'tc-1': '---',   'tc-2': '1.2 AU', 'tc-3': '047°',
-            'tr-1': 'ON',    'tr-2': 'CLEAR',  'tr-3': 'AUTO',
-            'bl-1': '87%',   'bl-2': '312K',   'bl-3': '0.04',
-            'bc-1': '0.04',  'bc-2': '3.1 AU', 'bc-3': 'N 047',
-            'br-1': 'EMPTY', 'br-2': '1/1',    'br-3': 'NOMINAL',
+			'tl-1': '---',   'tl-2': '100%', 'tl-3': '0%',
+            'tc-1': '0.00',  'tc-2': '---',  'tc-3': '000°',
+            'tr-1': '1%',    'tr-2': '100%', 'tr-3': '100%',
+            //~ 'tl-1': '100%',  'tl-2': '98%',   'tl-3': 'OK',
+            //~ 'tc-1': '---',   'tc-2': '1.2 AU', 'tc-3': '047°',
+            //~ 'tr-1': 'ON',    'tr-2': 'CLEAR',  'tr-3': 'AUTO',
+            //~ 'bl-1': '87%',   'bl-2': '312K',   'bl-3': '0.04',
+            //~ 'bc-1': '0.04',  'bc-2': '3.1 AU', 'bc-3': 'N 047',
+            //~ 'br-1': 'EMPTY', 'br-2': '1/1',    'br-3': 'NOMINAL',
         };
         return values[id] ?? '---';
     }
@@ -485,15 +615,18 @@ export class Hud {
         }
     }
 
-    _applyActiveStyle(id) {
+	_applyActiveStyle(id) {
         const box = this._boxes[id];
         if (!box) return;
         box.bg.setAttribute('fill', 'url(#hudBoxGradActive)');
         box.bg.setAttribute('stroke', '#6ab8ff');
         box.bg.setAttribute('stroke-width', '1.1');
         box.lbl.setAttribute('fill', '#aee0ff');
-        box.val.setAttribute('fill', '#ffffff');
-        box.val.setAttribute('filter', 'url(#hudGlowStrong)');
+        if (box.val) {
+            box.val.setAttribute('fill', '#ffffff');
+            box.val.setAttribute('filter', 'url(#hudGlowStrong)');
+        }
+        if (box.track) box.track.setAttribute('stroke-width', '1.1');
         box.g.setAttribute('filter', 'url(#hudGlowStrong)');
     }
 
@@ -504,8 +637,11 @@ export class Hud {
         box.bg.setAttribute('stroke', '#2a4a6a');
         box.bg.setAttribute('stroke-width', '0.7');
         box.lbl.setAttribute('fill', '#4a8aaa');
-        box.val.setAttribute('fill', '#88ccee');
-        box.val.setAttribute('filter', 'url(#hudGlow)');
+        if (box.val) {
+            box.val.setAttribute('fill', '#88ccee');
+            box.val.setAttribute('filter', 'url(#hudGlow)');
+        }
+        if (box.track) box.track.setAttribute('stroke-width', '0.7');
         box.g.removeAttribute('filter');
     }
 

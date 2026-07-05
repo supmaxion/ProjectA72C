@@ -28,7 +28,27 @@ async function init() {
     const scene    = createScene();
     const camera   = createCamera();
     const renderer = createRenderer(camera);
-    const hud = new Hud();
+    const hud = new Hud({
+        controls: [
+            {
+                id: 'bl-1',
+                label: 'ORBIT',
+                initial: false,
+                onToggle: (state) => {
+                    orbitLinesVisible = state;
+                    systemManager.setOrbitLinesVisible(orbitLinesVisible);
+                },
+            },
+            {
+                id: 'bl-2',
+                label: 'HOLO',
+                initial: false,
+                onToggle: () => {
+                    ship.toggle();
+                },
+            },
+        ],
+    });
     const saveManager = new SaveManager();
     const savedState = saveManager.load();
     const systemManager = new SystemManager(scene);
@@ -50,6 +70,8 @@ async function init() {
 		ship.speed = savedState.ship.speed;
 
 		orbitLinesVisible = savedState.settings?.orbitLinesVisible ?? false;
+        systemManager.setOrbitLinesVisible(orbitLinesVisible);
+        hud.setControlState('bl-1', orbitLinesVisible);
 		systemManager.setOrbitLinesVisible(orbitLinesVisible);
 	} else {
 		systemManager.jumpTo('home');
@@ -120,10 +142,6 @@ async function init() {
     // --- TOGGLE ORBIT LINES ---
     systemManager.current.setOrbitLinesVisible(orbitLinesVisible);
     window.addEventListener('keydown', (e) => {
-        if (e.key === 't' || e.key === 'T') {
-            orbitLinesVisible = !orbitLinesVisible;
-            systemManager.setOrbitLinesVisible(orbitLinesVisible);
-        }
         if (e.key === 'a' || e.key === 'A') keyState.rollLeft = true;
         if (e.key === 'd' || e.key === 'D') keyState.rollRight = true;
 
@@ -132,8 +150,9 @@ async function init() {
             hud.cycleActiveBox(e.shiftKey ? -1 : 1);
             messages?.markDone('tabCycle');
         }
-        if (e.key === 'Enter') {
-            ship.toggle();
+		if (e.code === 'Space') {
+            e.preventDefault();
+            hud.toggleActiveControl();
         }
     });
 
@@ -181,16 +200,16 @@ async function init() {
         updateCameraFollow(camera, ship);
         
 		//*** HUD boxok frissítése
-		const throttle = ((ship.speed - SHIP.minSpeed) / (SHIP.maxSpeed - SHIP.minSpeed)) * 100;
-		hud.updateBox('bl-3', { value: `${throttle.toFixed(0)}% ${ship._thrustState}` });
-		hud.updateBox('bc-1', { value: ship.speed.toFixed(2) });
-		hud.updateBox('bc-3', { value: `${ship.heading.toFixed(0)}°` });
-		const nearestPlanet = getNearestPlanetAltitude(ship.position, systemManager.current);
-		if (nearestPlanet) {
-			hud.updateBox('bc-2', { value: formatAltitude(nearestPlanet.altitude) });
-		}
-		const stationDist = ship.position.distanceTo(systemManager.current.station.position) - systemManager.current.station.radius;
-		hud.updateBox('tc-2', { value: formatDistance(stationDist) });
+        const throttle = ((ship.speed - SHIP.minSpeed) / (SHIP.maxSpeed - SHIP.minSpeed)) * 100;
+        hud.updateBox('tl-3', { value: `${throttle.toFixed(0)}% ${ship._thrustState}` });
+        hud.updateBox('tc-1', { value: ship.speed.toFixed(2) });
+        hud.updateBox('tc-3', { value: `${ship.heading.toFixed(0)}°` });
+        const nearestPlanet = getNearestPlanetAltitude(ship.position, systemManager.current);
+        if (nearestPlanet) {
+            hud.updateBox('tc-2', { value: formatAltitude(nearestPlanet.altitude) });
+        }
+        const stationDist = ship.position.distanceTo(systemManager.current.station.position) - systemManager.current.station.radius;
+        hud.updateBox('tl-1', { value: formatDistance(stationDist) });
 		
 		//bányászat
 		miningSystem.update(delta, ship, systemManager.current.asteroidBelt);
