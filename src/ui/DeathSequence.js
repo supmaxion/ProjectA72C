@@ -1,4 +1,3 @@
-import { RestApi } from '../RestApi'
 
 export class DeathSequence {
     constructor({ onRestart } = {}) {
