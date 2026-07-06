@@ -9,8 +9,8 @@ header('Content-Type: application/json');
 
 $action = $_GET['action'] ?? null;
 
-require_once __DIR__ . '/../space-php-src/functions.php';
-require_once __DIR__ . '/../space-php-src/Browser.php';
+require_once __DIR__ . '/../minarix-functions/functions.php';
+require_once __DIR__ . '/../minarix-functions/Browser.php';
 $oBrowser = new Browser;
 
 $logArr = array();
@@ -27,7 +27,7 @@ if ( $query && $query['status'] == 'success' )
 	$logArr['ipCity'] = $query['city'];
 }		
 		
-$sContent = "SpaceGame";
+$sContent = "Minarix";
 $sContent .= "<br> IP cím: " . get_ip_address();
 $sContent .= "<br> Szolgáltató: " . $logArr['ipIsp'];
 $sContent .= "<br> Org: " . $logArr['ipOrg'];

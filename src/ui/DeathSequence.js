@@ -6,8 +6,6 @@ export class DeathSequence {
         this._injectStyles();
         this._buildDom();
 
-        RestApi('Hit');
-
     }
 
     _injectStyles() {

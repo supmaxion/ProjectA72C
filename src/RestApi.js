@@ -14,19 +14,19 @@ export function RestApi( phase ) {
 
     switch (phase) {
         case 'Indul':
-            url = "https://labor24.hu/space/api.php?action=Indul"
+            url = "https://minarix.eu/api.php?action=Indul"
             break
         case 'death':
-            url = "https://labor24.hu/space/api.php?action=death"
+            url = "https://minarix.eu/api.php?action=death"
             break
         case 'jump':
-            url = "https://labor24.hu/space/api.php?action=jump"
+            url = "https://minarix.eu/api.php?action=jump"
             break
         case 'mined':
-            url = "https://labor24.hu/space/api.php?action=mined"
+            url = "https://minarix.eu/api.php?action=mined"
             break
         case 'Hit':
-            url = "https://labor24.hu/space/api.php?action=Hit"
+            url = "https://minarix.eu/api.php?action=Hit"
             break
         default:
             console.log('Ismeretlen phase:', phase)
