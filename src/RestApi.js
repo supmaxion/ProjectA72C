@@ -16,8 +16,14 @@ export function RestApi( phase ) {
         case 'Indul':
             url = "https://labor24.hu/space/api.php?action=Indul"
             break
-        case 'Landing':
-            url = "https://labor24.hu/space/api.php?action=Landing"
+        case 'death':
+            url = "https://labor24.hu/space/api.php?action=death"
+            break
+        case 'jump':
+            url = "https://labor24.hu/space/api.php?action=jump"
+            break
+        case 'mined':
+            url = "https://labor24.hu/space/api.php?action=mined"
             break
         case 'Hit':
             url = "https://labor24.hu/space/api.php?action=Hit"

@@ -2,7 +2,7 @@ import * as THREE from 'three';
 
 
 export const GAME_START = {
-    blink: false, // true: a játék indításakor villogjon a képernyő, false: azonnal induljon
+    blink: true, // true: a játék indításakor villogjon a képernyő, false: azonnal induljon
 };
 
 export const CELESTIAL = {
@@ -10,7 +10,7 @@ export const CELESTIAL = {
 };
 
 export const MOUSE_SENSITIVITY = {
-    value: 0.00022,
+    value: 0.00011,//0.00022
 };
 
 export const SYSTEM_VISIBILITY = {
@@ -41,10 +41,10 @@ export const DUST_FIELD = {
 };
 
 export const SHIP = {
-    //~ startPosition: new THREE.Vector3(0, 3000, 53000),//0,3000,70000
-    startPosition: new THREE.Vector3(4000, 100, -6600),//stationnál
+    startPosition: new THREE.Vector3(0, 3000, 53000),//0,3000,70000
+    //~ startPosition: new THREE.Vector3(4000, 100, -6600),//stationnál
     speed: 0.45,
-    minSpeed: 0.01,
+    minSpeed: 0,
     maxSpeed: 300,
     scrollAcceleration: 0.5,  // sebesség-változás görgőegységenként
     modelSize: 15, 
@@ -120,7 +120,7 @@ export const MINING = {
     tipColor: 0x99e5ff,
     materialChunkRadius: 2.2, 
     explosionChunkCount: 3,
-    explosionDuration: 5,             // mp, amíg a robbanás-darabok elhalványulnak
+    explosionDuration: 3,             // mp, amíg a robbanás-darabok elhalványulnak
     explosionKickSpeed: { min: 8, max: 16 }, 
 };
 
@@ -142,8 +142,8 @@ export const ORBIT_TRAIL = {
 };
 
 export const BACKGROUND_OBJECTS = {
-    skyDistance: 9000, // kamerától való távolság — a far plane alatt kell legyen
-  spawnRadius: {
+    skyDistance: 90000, // kamerától való távolság — a far plane alatt kell legyen
+	spawnRadius: {
     min: 8000,   // ne legyen túl közel az origóhoz
     max: 20000,
   },
@@ -183,9 +183,9 @@ export const BACKGROUND_OBJECTS = {
 };
 
 export const MILKY_WAY = {
-    starCount: 8000,
+    starCount: 2000,
     starSize: 0.3,
-    bandThickness: 0.04,        // mennyire "vastag" a sáv (gauss szórás)
+    bandThickness: 0.08,        // mennyire "vastag" a sáv (gauss szórás)
     bandTilt: THREE.MathUtils.degToRad(5),
     skyDistance: BACKGROUND_OBJECTS.skyDistance, // ugyanaz, mint a többi háttérobjektumnál
 };

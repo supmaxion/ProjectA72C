@@ -43,10 +43,10 @@ if ($action === 'Indul') {
 	sendEmail( "info@labor24.hu", 'Indították', $sContent, '<info@labor24.hu>', 'info@labor24.hu' );
 	// mail('attila.zsolt.nagy@gmail.com', 'Test subject', 'Test body');
 	// mail( "info@labor24.hu", 'Warp Exit volt', 'üzenet' );
-}elseif ($action === 'Landing') {
-	sendEmail( "info@labor24.hu", 'Leszállás volt', $sContent, '<info@labor24.hu>', 'info@labor24.hu' );
-}elseif ($action === 'Hit') {
-	sendEmail( "info@labor24.hu", 'Ütközés volt', $sContent, '<info@labor24.hu>', 'info@labor24.hu' );
+}elseif ($action === 'death') { sendEmail( "info@labor24.hu", 'Death volt', $sContent, '<info@labor24.hu>', 'info@labor24.hu' );
+}elseif ($action === 'jump') { sendEmail( "info@labor24.hu", 'Jump volt', $sContent, '<info@labor24.hu>', 'info@labor24.hu' );
+}elseif ($action === 'jump') { sendEmail( "info@labor24.hu", 'Bányászás volt', $sContent, '<info@labor24.hu>', 'info@labor24.hu' );
+}elseif ($action === 'Hit') {	sendEmail( "info@labor24.hu", 'Ütközés volt', $sContent, '<info@labor24.hu>', 'info@labor24.hu' );
 }
 exit;
 

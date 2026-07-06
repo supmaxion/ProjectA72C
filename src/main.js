@@ -223,6 +223,7 @@ async function init() {
 		// kibányászva:
 		if (lastMinedMessage && performance.now() - lastMinedMessageTime < 3000) {
 			hud.updateStatusLine('left', lastMinedMessage);
+			RestApi('mined');
 		} else {
 			hud.updateStatusLine('left', '');
 			lastMinedMessage = null;
@@ -267,6 +268,7 @@ async function init() {
 				inventory,
 			});
     
+			RestApi('death');
             deathSequence.trigger();
         }
 
@@ -282,6 +284,8 @@ async function init() {
 			const nextSeed = station.destinationSeed;
 			
 			jumpTransition.show('JUMPING');
+			
+			RestApi('jump');
 			
 			systemManager.jumpTo(nextSeed);
 			saveManager.save({ systemManager, ship, orbitLinesVisible, inventory });

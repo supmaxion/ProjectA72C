@@ -19,7 +19,7 @@ export class MessageManager {
             { action: 'esc',      delay: 16, x: 50, y: 30, text: 'I can use "esc"' },
             { action: 'wheel',    delay: 24, x: 50, y: 40, text: 'I could scroll to change speed' },
             { action: 'tabCycle', delay: 32, x: 50, y: 60, text: 'Tab cycles the HUD' },
-            // ide jönnek majd a további játékbeli üzenetek...
+            { action: 'checkAsteroids', delay: 82, x: 50, y: 60, text: 'I feel like I\'ll check the asteroid belt' },
         ];
     }
 
