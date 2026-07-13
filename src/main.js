@@ -28,6 +28,7 @@ async function init() {
     const scene    = createScene();
     const camera   = createCamera();
     const renderer = createRenderer(camera);
+    let hologramOn = false;
     const hud = new Hud({
         controls: [
             {
@@ -43,7 +44,8 @@ async function init() {
                 id: 'bl-2',
                 label: 'HOLO',
                 initial: false,
-                onToggle: () => {
+                onToggle: (state) => {
+					hologramOn = state;
                     ship.toggle();
                 },
             },
@@ -62,6 +64,7 @@ async function init() {
     // --- ENTITIES ---
     const ship = new Ship();
     
+    // mentett állapot betöltése
 	if (savedState) {
 		systemManager.restoreFromSave(savedState);
 
@@ -72,7 +75,11 @@ async function init() {
 		orbitLinesVisible = savedState.settings?.orbitLinesVisible ?? false;
         systemManager.setOrbitLinesVisible(orbitLinesVisible);
         hud.setControlState('bl-1', orbitLinesVisible);
-		systemManager.setOrbitLinesVisible(orbitLinesVisible);
+        
+		hologramOn = savedState.settings?.holoVisible ?? false;
+        hud.setControlState('bl-2', hologramOn);
+        if (hologramOn) ship.toggle();
+        
 	} else {
 		systemManager.jumpTo('home');
 	}
@@ -118,10 +125,15 @@ async function init() {
     const backgroundObjects = spawnBackgroundObjects(scene);
 
     //pislogás és hullám animáció
+    let blinkShown = savedState?.settings?.blinkShown ?? false;
     let messages = null;
     if (GAME_START.blink) {
-        new Blink({ delay: 500 });
+        if (!blinkShown) {
+            new Blink({ delay: 500 });
+            blinkShown = true;
+        }
         messages = new MessageManager();
+        messages.restoreShownState(savedState?.shownMessages ?? []);
         messages.start();
     }
 
@@ -264,8 +276,7 @@ async function init() {
 					quaternion: ship.quaternion.clone(),
 					speed: SHIP.speed,
 				},
-				orbitLinesVisible,
-				inventory,
+				...getSaveExtras(),
 			});
     
 			RestApi('death');
@@ -288,7 +299,7 @@ async function init() {
 			RestApi('jump');
 			
 			systemManager.jumpTo(nextSeed);
-			saveManager.save({ systemManager, ship, orbitLinesVisible, inventory });
+			saveManager.save({ systemManager, ship, ...getSaveExtras() });
 			
 			// hajó pozicionálása az új rendszer station-je mellé
 			const newStation = systemManager.current.station;
@@ -317,15 +328,25 @@ async function init() {
 		return `${(dist / 1000).toFixed(1)}k`;
 	}
 	
+	function getSaveExtras() {
+        return {
+            orbitLinesVisible,
+            holoVisible: hologramOn,
+            blinkShown,
+            inventory,
+            shownMessages: messages?.getShownState() ?? [],
+        };
+    }
+	
 	//auto mentések
 	setInterval(() => {
 		if (isGameOver) return; // ne mentsen halott állapotot
-		saveManager.save({ systemManager, ship, orbitLinesVisible, inventory });
+		saveManager.save({ systemManager, ship, ...getSaveExtras() });
 	}, 10000);
 	// bezáráskor/frissítéskor:
 	window.addEventListener('beforeunload', () => {
 		if (isGameOver) return;
-		saveManager.save({ systemManager, ship, orbitLinesVisible, inventory });
+		saveManager.save({ systemManager, ship, ...getSaveExtras() });
 	});
 	
     RestApi('Indul');

@@ -2,7 +2,16 @@ const SAVE_KEY = 'project-a72c-save';
 const SAVE_VERSION = 1;
 
 export class SaveManager {
-    save({ systemManager, ship, orbitLinesVisible, inventory = {}, shipUpgrades = {} }) {
+    save({
+        systemManager,
+        ship,
+        orbitLinesVisible,
+        holoVisible = false,
+        blinkShown = false,
+        inventory = {},
+        shipUpgrades = {},
+        shownMessages = [],
+    }) {
         const data = {
             version: SAVE_VERSION,
             ...systemManager.getSaveData(),   // currentSeed, visitedSeeds, systemTimes, systemLinks, systemState
@@ -15,7 +24,10 @@ export class SaveManager {
             shipUpgrades,
             settings: {
                 orbitLinesVisible,
+                holoVisible,
+                blinkShown,
             },
+            shownMessages,
             savedAt: Date.now(),
         };
 

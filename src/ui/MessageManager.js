@@ -41,6 +41,25 @@ export class MessageManager {
         this._done.add(action);
     }
 
+/**
+     * Azoknak a szabályoknak az action-jeit adja vissza, amik már
+     * megjelentek a játékosnak (mentéshez).
+     */
+    getShownState() {
+        return this._rules.filter(r => r._shown).map(r => r.action);
+    }
+
+    /**
+     * Betöltéskor visszaállítja, mely üzenetek jelentek már meg korábban —
+     * ezeket többé nem mutatja meg újra.
+     */
+    restoreShownState(actions = []) {
+        const shown = new Set(actions);
+        for (const rule of this._rules) {
+            if (shown.has(rule.action)) rule._shown = true;
+        }
+    }
+    
     _tick() {
         const elapsed = (performance.now() - this._startTime) / 1000;
         for (const rule of this._rules) {
