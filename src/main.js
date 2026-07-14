@@ -61,6 +61,8 @@ async function init() {
     let jumpCooldown = 0;
     let orbitLinesVisible = false;
     
+    let suppressSaveOnUnload = false; //fejlesztői törléshez
+    
     // --- ENTITIES ---
     const ship = new Ship();
     
@@ -165,6 +167,13 @@ async function init() {
 		if (e.code === 'Space') {
             e.preventDefault();
             hud.toggleActiveControl();
+        }
+        //fejlesztői local storage törlés
+        if (e.ctrlKey && e.shiftKey && e.key === 'Delete') {
+            e.preventDefault();
+            suppressSaveOnUnload = true;
+            saveManager.hardReset();
+            window.location.reload();
         }
     });
 
@@ -345,7 +354,7 @@ async function init() {
 	}, 10000);
 	// bezáráskor/frissítéskor:
 	window.addEventListener('beforeunload', () => {
-		if (isGameOver) return;
+		if (isGameOver || suppressSaveOnUnload) return;//  gameover vagy fejlesztői törlés van, akkor ne mentsen
 		saveManager.save({ systemManager, ship, ...getSaveExtras() });
 	});
 	

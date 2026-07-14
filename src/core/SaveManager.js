@@ -57,4 +57,10 @@ export class SaveManager {
     clear() {
         localStorage.removeItem(SAVE_KEY);
     }
+    
+    /** Fejlesztői teljes törlés: az ÖSSZES localStorage-tartalmat törli, nem csak a mentést. */
+    hardReset() {
+        localStorage.clear();
+    }
+    
 }
