@@ -61,7 +61,7 @@ async function init() {
     let jumpCooldown = 0;
     let orbitLinesVisible = false;
     
-    let suppressSaveOnUnload = false; //fejlesztői törléshez
+    let suppressSaveOnUnload = false; //fejlesztői törléshez ctrl+shift+del
     
     // --- ENTITIES ---
     const ship = new Ship();
@@ -156,8 +156,14 @@ async function init() {
     // --- TOGGLE ORBIT LINES ---
     systemManager.current.setOrbitLinesVisible(orbitLinesVisible);
     window.addEventListener('keydown', (e) => {
-        if (e.key === 'a' || e.key === 'A') keyState.rollLeft = true;
-        if (e.key === 'd' || e.key === 'D') keyState.rollRight = true;
+        if (e.key === 'a' || e.key === 'A') {
+			keyState.rollLeft = true;
+			messages?.markDone('roll');
+		}
+        if (e.key === 'd' || e.key === 'D') {
+			keyState.rollRight = true;
+			messages?.markDone('roll');
+		}
 
         if (e.key === 'Tab') {
             e.preventDefault();
