@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { SYSTEM_VISIBILITY, MATERIALS, MINING } from '../config.js';
+import { SYSTEM_VISIBILITY, MATERIALS, MINING, ASTEROID_BELT } from '../config.js';
 import { createRng } from '../utils/seededRandom.js';
 
 function pickMaterial(rng) {
@@ -110,10 +110,12 @@ export class AsteroidField {
 	}
 
     // Ütközésvizsgálathoz: visszaadja a legközelebbi találatot, vagy null-t
-    checkCollision(shipPosition) {
+    checkCollision(shipPosition, shipRadius = 0) {
+        const multiplier = ASTEROID_BELT.collisionRadiusMultiplier ?? 1;
         for (const a of this.asteroids) {
             const dist = shipPosition.distanceTo(a.mesh.position);
-            if (dist < a.size) {
+            const hitRadius = a.size * multiplier + shipRadius;
+            if (dist < hitRadius) {
                 return { name: 'Asteroid', position: a.mesh.position, radius: a.size };
             }
         }

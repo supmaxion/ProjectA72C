@@ -572,7 +572,20 @@ _makeToggleBox(id, x, y, w, h, skew, label) {
         if (value !== undefined) box.val.textContent = value;
     }
 
-/**
+
+	/** Rövid ideig kiemeli a boxot (pl. piros villanás sérüléskor), aztán visszaáll. */
+    flashBox(id, color = '#ff4040', duration = 300) {
+        const box = this._boxes[id];
+        if (!box) return;
+        if (box.val) box.val.setAttribute('fill', color);
+        box.bg.setAttribute('stroke', color);
+        setTimeout(() => {
+            if (this._activeId === id) return; // aktív box stílusát ne írjuk felül
+            this._resetBoxStyle(id);
+        }, duration);
+    }
+    
+	/**
      * A nagy középső "játékablak" (oktogon) képernyő-koordinátáit adja vissza
      * (a bounding boxát), hogy külső DOM elemet (pl. hologram canvas) rá lehessen
      * pozicionálni.

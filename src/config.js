@@ -52,6 +52,12 @@ export const SHIP = {
     rollSpeed: 0.012,       // roll szögsebesség A/D gombonként, radián/frame
     // driftFollow: 1,      // mennyire "lassan" éri utol a drift a tényleges yaw-t (kisebb = lustább, nagyobb csúszás)
     // driftStrength: 3,     // a csúszás mértéke (yaw-különbség szorzója)
+	collisionRadius: 20,   // hajó ütközési "hitbox" sugara (aszteroida-találathoz)
+    shield: {
+        max: 100,
+        hitDamage: 25,     // ennyit veszít egy aszteroida-találatkor
+        hitCooldown: 1.0,  // mp, amíg egy találat után nem sebezhető újra
+    },
 };
 
 export const CAMERA = {
@@ -106,6 +112,7 @@ export const ASTEROID_BELT = {
     minSize: 10,
     maxSize: 60,
     color: 0x8a7d6e,
+    collisionRadiusMultiplier: 1.8, // ütközési sugár = a.size * ez, + hajó collisionRadius
 };
 
 export const MINING = {

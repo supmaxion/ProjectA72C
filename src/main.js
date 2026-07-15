@@ -22,6 +22,7 @@ import { SystemManager } from './core/SystemManager.js';
 import { JumpTransition } from './ui/JumpTransition.js';
 import { SaveManager } from './core/SaveManager.js';
 import { MiningSystem } from './physics/MiningSystem.js';
+import { HitFlash } from './ui/HitFlash.js';
 
 async function init() {
     // --- CORE ---
@@ -51,6 +52,12 @@ async function init() {
             },
         ],
     });
+    
+    const hitFlash = new HitFlash();
+    let shakeTime = 0;
+    const shakeDuration = 0.25;
+    const shakeMagnitude = 6;
+    
     const saveManager = new SaveManager();
     const savedState = saveManager.load();
     const systemManager = new SystemManager(scene);
@@ -60,6 +67,8 @@ async function init() {
     let cameraRollAngle = 0;
     let jumpCooldown = 0;
     let orbitLinesVisible = false;
+    let shield = savedState?.shield ?? SHIP.shield.max;
+    let shieldHitCooldown = 0;
     
     let suppressSaveOnUnload = false; //fejlesztői törléshez ctrl+shift+del
     
@@ -226,11 +235,22 @@ async function init() {
 
         updateCameraFollow(camera, ship);
         
+        //aszteroida ütközés animáció
+		if (shakeTime > 0) {
+            shakeTime -= delta;
+            const s = shakeMagnitude * Math.max(shakeTime / shakeDuration, 0);
+            camera.position.x += (Math.random() - 0.5) * s;
+            camera.position.y += (Math.random() - 0.5) * s;
+            
+            // todo Ha később hangeffektet is akarsz a találathoz (pl. Web Audio API-val egy rövid "clank"), az is könnyen bekapcsolható ugyanide — szólj, ha odáig eljutsz.
+        }
+        
 		//*** HUD boxok frissítése
         const throttle = ((ship.speed - SHIP.minSpeed) / (SHIP.maxSpeed - SHIP.minSpeed)) * 100;
         hud.updateBox('tl-3', { value: `${throttle.toFixed(0)}% ${ship._thrustState}` });
         hud.updateBox('tc-1', { value: ship.speed.toFixed(2) });
         hud.updateBox('tc-3', { value: `${ship.heading.toFixed(0)}°` });
+        hud.updateBox('tr-2', { value: `${Math.round(shield)}%` });
         const nearestPlanet = getNearestPlanetAltitude(ship.position, systemManager.current);
         if (nearestPlanet) {
             hud.updateBox('tc-2', { value: formatAltitude(nearestPlanet.altitude) });
@@ -271,32 +291,28 @@ async function init() {
         milkyWay.update(camera.position);
         fog.update(camera.position);
 
-        // Ütközésvizsgálat a hajó és a bolygók/holdak között
-        const asteroidHit = systemManager.current.asteroidBelt.checkCollision(ship.position);
-        const hitBody = asteroidHit || checkShipCollision(ship.position, [...systemManager.current.getCollidableBodies(), sunCollider]);
-        if (hitBody) {
-            isGameOver = true;
-            
-			// Mentsünk a halál pillanatában is — az inventory és a kibányászott aszteroidák
-			// (systemState) ne vesszenek el —, de a hajó pozícióját írjuk felül egy
-			// biztonságos ponttal (a station mellé), nehogy a halál-helyszín (bolygó/nap
-			// belseje) töltődjön vissza újraindításkor.
-			const safePosition = systemManager.current.station.position.clone()
-				.add(new THREE.Vector3(0, 0, systemManager.current.station.radius * 3));
+		// Ütközésvizsgálat: bolygó/nap = azonnali halál, aszteroida = pajzs-sebzés
+        if (shieldHitCooldown > 0) shieldHitCooldown -= delta;
 
-			saveManager.save({
-				systemManager,
-				ship: {
-					position: safePosition,
-					quaternion: ship.quaternion.clone(),
-					speed: SHIP.speed,
-				},
-				...getSaveExtras(),
-			});
-    
-			RestApi('death');
-            deathSequence.trigger();
+        const bodyHit = checkShipCollision(ship.position, [...systemManager.current.getCollidableBodies(), sunCollider]);
+        if (bodyHit) {
+            triggerDeath();
+        } else {
+            const asteroidHit = systemManager.current.asteroidBelt.checkCollision(ship.position, SHIP.collisionRadius);
+            if (asteroidHit && shieldHitCooldown <= 0) {
+                shield = Math.max(0, shield - SHIP.shield.hitDamage);
+                shieldHitCooldown = SHIP.shield.hitCooldown;
+                
+				hitFlash.flash();
+                shakeTime = shakeDuration;
+                hud.flashBox('tr-2');
+                
+                if (shield <= 0) {
+                    triggerDeath();
+                }
+            }
         }
+
 
 		// Station megközelítése
 		if (jumpCooldown > 0) {
@@ -343,6 +359,33 @@ async function init() {
 		return `${(dist / 1000).toFixed(1)}k`;
 	}
 	
+	
+	function triggerDeath() {
+        if (isGameOver) return; // ne fusson le kétszer
+        isGameOver = true;
+
+        // A halál pillanatában is mentsünk — inventory/systemState ne vesszen el —,
+        // de a pozíciót biztonságos pontra írjuk (station mellé), és a pajzsot
+        // teljes értékre állítjuk vissza, nehogy a következő induláskor 0-ról
+        // kezdődjön (végtelen halál-ciklus).
+        const safePosition = systemManager.current.station.position.clone()
+            .add(new THREE.Vector3(0, 0, systemManager.current.station.radius * 3));
+
+        saveManager.save({
+            systemManager,
+            ship: {
+                position: safePosition,
+                quaternion: ship.quaternion.clone(),
+                speed: SHIP.speed,
+            },
+            ...getSaveExtras(),
+            shield: SHIP.shield.max,
+        });
+
+		RestApi('death');
+        deathSequence.trigger();
+    }
+    
 	function getSaveExtras() {
         return {
             orbitLinesVisible,
@@ -350,6 +393,7 @@ async function init() {
             blinkShown,
             inventory,
             shownMessages: messages?.getShownState() ?? [],
+            shield,
         };
     }
 	
