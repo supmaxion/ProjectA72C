@@ -23,6 +23,7 @@ import { JumpTransition } from './ui/JumpTransition.js';
 import { SaveManager } from './core/SaveManager.js';
 import { MiningSystem } from './physics/MiningSystem.js';
 import { HitFlash } from './ui/HitFlash.js';
+import { SfxManager } from './ui/SfxManager.js';
 
 async function init() {
     // --- CORE ---
@@ -57,6 +58,7 @@ async function init() {
     let shakeTime = 0;
     const shakeDuration = 0.25;
     const shakeMagnitude = 6;
+    const sfx = new SfxManager();
     
     const saveManager = new SaveManager();
     const savedState = saveManager.load();
@@ -304,6 +306,7 @@ async function init() {
                 shieldHitCooldown = SHIP.shield.hitCooldown;
                 
 				hitFlash.flash();
+				sfx.hit();
                 shakeTime = shakeDuration;
                 hud.flashBox('tr-2');
                 
