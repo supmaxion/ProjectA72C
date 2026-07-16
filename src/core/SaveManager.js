@@ -12,6 +12,7 @@ export class SaveManager {
         shipUpgrades = {},
         shownMessages = [],
         shield,
+        fuel,
     }) {
         const data = {
             version: SAVE_VERSION,
@@ -24,6 +25,7 @@ export class SaveManager {
             inventory,
             shipUpgrades,
             shield,
+            fuel,
             settings: {
                 orbitLinesVisible,
                 holoVisible,

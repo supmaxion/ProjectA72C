@@ -68,6 +68,14 @@ export const CAMERA = {
     rotationX: THREE.MathUtils.degToRad(0),
 };
 
+export const FUEL = {
+    max: 100,
+    scrollDrainRate: 0.0001,   // fuel-fogyás |scroll delta| egységenként (gyorsítás/lassítás)
+    rollDrainRate: 0.1,        // fuel/mp, amíg A vagy D nyomva van
+    mouseDrainRate: 0.1,   // fuel-fogyás (|yaw|+|pitch|) egységenként (egérmozgás mértéke)
+    shieldDrainRate: 0.05,      // shield%/mp, amíg fuel = 0
+};
+
 export const COMET = {
     name: 'Comet',
     radius: 15,

@@ -8,7 +8,7 @@ import { createDustField } from './entities/DustField.js';
 import { MouseLook } from './controls/MouseLook.js';
 import { getOverlayElements } from './ui/overlay.js';
 import { spawnBackgroundObjects } from './entities/BackgroundObject.js';
-import { DUST_FIELD, GAME_START, BACKGROUND_OBJECTS as CFG, SHIP, MOUSE_SENSITIVITY } from './config.js';
+import { DUST_FIELD, GAME_START, BACKGROUND_OBJECTS as CFG, SHIP, MOUSE_SENSITIVITY, FUEL } from './config.js';
 import { Blink } from './ui/Blink.js';
 import { Hud } from './ui/Hud.js';
 import { checkShipCollision } from './physics/CollisionSystem.js';
@@ -48,7 +48,7 @@ async function init() {
                 initial: false,
                 onToggle: (state) => {
 					hologramOn = state;
-                    ship.toggle();
+                    ship.setHoloVisible(state);
                 },
             },
         ],
@@ -71,6 +71,7 @@ async function init() {
     let orbitLinesVisible = false;
     let shield = savedState?.shield ?? SHIP.shield.max;
     let shieldHitCooldown = 0;
+    let fuel = savedState?.fuel ?? FUEL.max;
     
     let suppressSaveOnUnload = false; //fejlesztői törléshez ctrl+shift+del
     
@@ -91,7 +92,7 @@ async function init() {
         
 		hologramOn = savedState.settings?.holoVisible ?? false;
         hud.setControlState('bl-2', hologramOn);
-        if (hologramOn) ship.toggle();
+        ship.setHoloVisible(hologramOn);
         
 	} else {
 		systemManager.jumpTo('home');
@@ -232,6 +233,33 @@ async function init() {
 
         cameraRollAngle += input.roll * SHIP.rollSpeed;
         ship.update(input);
+        
+		// --- FUEL fogyás: gyorsítás/lassítás, roll, egérmozgás ---
+        if (input.scroll !== 0) {
+            fuel -= Math.abs(input.scroll) * FUEL.scrollDrainRate;
+        }
+        if (keyState.rollLeft || keyState.rollRight) {
+            fuel -= FUEL.rollDrainRate * delta;
+        }
+        const mouseMagnitude = Math.abs(input.yaw) + Math.abs(input.pitch);
+        if (mouseMagnitude > 0) {
+            fuel -= mouseMagnitude * FUEL.mouseDrainRate;
+        }
+        fuel = Math.max(0, Math.min(FUEL.max, fuel));
+
+        // --- Fuel kifogyva: energia-átirányítás shieldből ---
+        if (fuel <= 0) {
+            shield = Math.max(0, shield - FUEL.shieldDrainRate * delta);
+            hud.updateStatusLine('right', 'ENERGY REROUTED: SHIELD -> FUEL');
+            if (shield <= 0) {
+                triggerDeath();
+            }
+        } else {
+            hud.updateStatusLine('right', '');
+        }
+        // --- FUEL fogyás: gyorsítás/lassítás, roll, egérmozgás ---
+        
+        
         systemManager.current.update(camera.position);
 
 
@@ -252,6 +280,7 @@ async function init() {
         hud.updateBox('tl-3', { value: `${throttle.toFixed(0)}% ${ship._thrustState}` });
         hud.updateBox('tc-1', { value: ship.speed.toFixed(2) });
         hud.updateBox('tc-3', { value: `${ship.heading.toFixed(0)}°` });
+        hud.updateBox('tl-2', { value: `${Math.round(fuel)}%` });
         hud.updateBox('tr-2', { value: `${Math.round(shield)}%` });
         const nearestPlanet = getNearestPlanetAltitude(ship.position, systemManager.current);
         if (nearestPlanet) {
@@ -383,6 +412,7 @@ async function init() {
             },
             ...getSaveExtras(),
             shield: SHIP.shield.max,
+            fuel: FUEL.max,
         });
 
 		RestApi('death');
@@ -397,6 +427,7 @@ async function init() {
             inventory,
             shownMessages: messages?.getShownState() ?? [],
             shield,
+            fuel,
         };
     }
 	

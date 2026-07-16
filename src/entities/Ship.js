@@ -37,6 +37,7 @@ export class Ship {
         this._holoBaseOpacity = 0.7;
         this._flickerTime = 0;
         this._modelLoaded = false;
+        this._pendingHoloVisible = null; // ha visible-t állítunk betöltés előtt, ide kerül, amíg a modell meg nem érkezik
 
         this._loadModel();
     }
@@ -72,9 +73,9 @@ export class Ship {
 
                 this.visualGroup.add(model);
 
-                this.visualGroup.visible = false; // alapból rejtve, csak hologramban látszik
                 this._modelLoaded = true;
                 this._modelSource = model; // ebből klónozunk a hologramnak
+                this.visualGroup.visible = this._pendingHoloVisible ?? false;
             },
             (xhr) => {
                 if (xhr.total > 0) {
@@ -131,6 +132,15 @@ export class Ship {
         this.visualGroup.visible = !this.visualGroup.visible;
     }
 
+	/** Determinisztikusan beállítja a hologram láthatóságát (nem kapcsol, hanem állít). */
+    setHoloVisible(visible) {
+        if (this._modelLoaded) {
+            this.visualGroup.visible = visible;
+        } else {
+            this._pendingHoloVisible = visible; // alkalmazzuk, amint a modell betöltött
+        }
+    }
+    
     update(input) {
         const { yaw, pitch, scroll, cameraRoll = 0 } = input;
 
