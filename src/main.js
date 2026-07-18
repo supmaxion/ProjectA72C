@@ -24,6 +24,7 @@ import { SaveManager } from './core/SaveManager.js';
 import { MiningSystem } from './physics/MiningSystem.js';
 import { HitFlash } from './ui/HitFlash.js';
 import { SfxManager } from './ui/SfxManager.js';
+import { MusicManager } from './ui/MusicManager.js';
 
 async function init() {
     // --- CORE ---
@@ -59,6 +60,7 @@ async function init() {
     const shakeDuration = 0.25;
     const shakeMagnitude = 6;
     const sfx = new SfxManager();
+    const musicManager = new MusicManager(); 
     
     const saveManager = new SaveManager();
     const savedState = saveManager.load();
@@ -262,6 +264,15 @@ async function init() {
         
         systemManager.current.update(camera.position);
 
+		// --- Övezet-zene: ha a hajó egy aszteroidaöv 3D sávjában van, szóljon a hozzá rendelt track ---
+		const currentBelt = systemManager.current.asteroidBelt;
+		const inBeltZone = currentBelt?.musicTrack && currentBelt.containsMusicZone(ship.position);
+
+		if (inBeltZone) {
+			musicManager.play(currentBelt.musicTrack);
+		} else if (musicManager.activeTrackId) {
+			musicManager.stop();
+		}
 
         updateCameraFollow(camera, ship);
         
@@ -271,8 +282,6 @@ async function init() {
             const s = shakeMagnitude * Math.max(shakeTime / shakeDuration, 0);
             camera.position.x += (Math.random() - 0.5) * s;
             camera.position.y += (Math.random() - 0.5) * s;
-            
-            // todo Ha később hangeffektet is akarsz a találathoz (pl. Web Audio API-val egy rövid "clank"), az is könnyen bekapcsolható ugyanide — szólj, ha odáig eljutsz.
         }
         
 		//*** HUD boxok frissítése
@@ -395,6 +404,7 @@ async function init() {
 	function triggerDeath() {
         if (isGameOver) return; // ne fusson le kétszer
         isGameOver = true;
+        musicManager.stop();
 
         // A halál pillanatában is mentsünk — inventory/systemState ne vesszen el —,
         // de a pozíciót biztonságos pontra írjuk (station mellé), és a pajzsot

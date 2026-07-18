@@ -121,6 +121,9 @@ export const ASTEROID_BELT = {
     maxSize: 60,
     color: 0x8a7d6e,
     collisionRadiusMultiplier: 1.8, // ütközési sugár = a.size * ez, + hajó collisionRadius
+	heightRangeMultiplier: 0.15, // ugyanaz az arány, amivel az AsteroidField a height-et generálja
+    musicTrack: 'belt-main',     // melyik MUSIC.tracks kulcs szóljon ebben az övben
+    musicTriggerMargin: 3000, 
 };
 
 export const MINING = {
@@ -471,5 +474,15 @@ export const HOME_SYSTEM = {
     station: {
         ...STATION,
         destinationSeed: 'sys-042',   // ide vezet a station
+    },
+};
+
+export const MUSIC = {
+    fadeOutDuration: 5,
+    fadeInDuration: 5,
+    targetVolume: 0.4,
+    tracks: {
+        'belt-main': `${import.meta.env.BASE_URL}audio/belt-main.mp3`,
+        // ide jönnek majd a további track-ek (bolygó-megközelítés, death, stb.)
     },
 };

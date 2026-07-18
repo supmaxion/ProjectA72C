@@ -16,7 +16,7 @@ function pickMaterial(rng) {
 export class AsteroidField {
     constructor({
         center, innerRadius, outerRadius, count, minSize, maxSize, color,
-        seed = 'default', beltId = 'main', minedIds = [],
+        seed = 'default', beltId = 'main', minedIds = [], musicTrack = null,
     }) {
         this.center = center;
         this.seed = seed;
@@ -24,6 +24,13 @@ export class AsteroidField {
         this.minedIds = new Set(minedIds);
         this.asteroids = [];
 
+		// a zóna-detektáláshoz (pl. háttérzene be/kikapcsolása) kell tárolni
+		this.innerRadius = innerRadius;
+		this.outerRadius = outerRadius;
+		this.heightRange = (outerRadius - innerRadius) * (ASTEROID_BELT.heightRangeMultiplier ?? 0.15);
+		this.musicTrack = musicTrack;
+		this.musicTriggerMargin = ASTEROID_BELT.musicTriggerMargin ?? 0;
+    
         const geoVariants = [];
         for (let i = 0; i < 4; i++) {
             const geo = new THREE.IcosahedronGeometry(1, 0);
@@ -121,6 +128,33 @@ export class AsteroidField {
         }
         return null;
     }
+    
+	// a hajó jelenleg ennek az övnek a 3D sávjában van (radiálisan + magasságban)
+	containsPosition(shipPosition) {
+		const dx = shipPosition.x - this.center.x;
+		const dz = shipPosition.z - this.center.z;
+		const radialDist = Math.sqrt(dx * dx + dz * dz);
+		if (radialDist < this.innerRadius || radialDist > this.outerRadius) return false;
+
+		const dy = Math.abs(shipPosition.y - this.center.y);
+		return dy <= this.heightRange;
+	}
+	
+	// Igaz, ha a hajó a zene-trigger zónában van — az öv sávja, kifelé/befelé
+	// musicTriggerMargin-nal megnövelve. A tényleges öv-tartózkodástól (containsPosition)
+	// szándékosan külön metódus, hogy más logika (pl. bányászat) ne kapja meg a margót.
+	containsMusicZone(shipPosition) {
+		const dx = shipPosition.x - this.center.x;
+		const dz = shipPosition.z - this.center.z;
+		const radialDist = Math.sqrt(dx * dx + dz * dz);
+
+		const innerEdge = this.innerRadius - this.musicTriggerMargin;
+		const outerEdge = this.outerRadius + this.musicTriggerMargin;
+		if (radialDist < innerEdge || radialDist > outerEdge) return false;
+
+		const dy = Math.abs(shipPosition.y - this.center.y);
+		return dy <= this.heightRange + this.musicTriggerMargin;
+	}
 
     // Bányászathoz: legközelebbi célpont a hajó orra előtti kúpban, range-en belül
     getMineableTarget(shipPosition, shipForward, range, viewAngleDeg) {
